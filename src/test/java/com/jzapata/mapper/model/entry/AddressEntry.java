@@ -1,6 +1,6 @@
-package com.joanzapata.mapper.model.entry;
+package com.jzapata.mapper.model.entry;
 
-import com.joanzapata.mapper.model.BookEntry;
+import com.jzapata.mapper.model.BookEntry;
 
 public class AddressEntry extends BookEntry {
 

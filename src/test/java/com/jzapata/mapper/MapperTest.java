@@ -1,13 +1,15 @@
-package com.joanzapata.mapper;
+package com.jzapata.mapper;
 
-import com.joanzapata.mapper.model.Book;
-import com.joanzapata.mapper.model.BookDTO;
-import com.joanzapata.mapper.model.BookEntry;
-import com.joanzapata.mapper.model.BookEntryDTO;
-import com.joanzapata.mapper.model.entry.AddressEntry;
-import com.joanzapata.mapper.model.entry.AddressEntryDTO;
-import com.joanzapata.mapper.model.entry.PhoneEntry;
-import com.joanzapata.mapper.model.entry.PhoneEntryDTO;
+import com.joanzapata.mapper.Mapper;
+import com.joanzapata.mapper.PropertyNotFoundException;
+import com.jzapata.mapper.model.Book;
+import com.jzapata.mapper.model.BookDTO;
+import com.jzapata.mapper.model.BookEntry;
+import com.jzapata.mapper.model.BookEntryDTO;
+import com.jzapata.mapper.model.entry.AddressEntry;
+import com.jzapata.mapper.model.entry.AddressEntryDTO;
+import com.jzapata.mapper.model.entry.PhoneEntry;
+import com.jzapata.mapper.model.entry.PhoneEntryDTO;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -85,19 +87,15 @@ public class MapperTest {
 
     @Test(expected = PropertyNotFoundException.class)
     public void throwExceptionIfPropertyNotFoundInSource() {
-        class A {
-
-        }
-
-        class B {
-
-            void setName(String name) {
-
-            }
-        }
-
         new Mapper()
                 .setThrowExceptionIfPropertyNotFoundInSource(true)
                 .map(new A(), B.class);
+    }
+
+    public static class A {
+    }
+
+    public static class B {
+        public void setName(String name) { }
     }
 }

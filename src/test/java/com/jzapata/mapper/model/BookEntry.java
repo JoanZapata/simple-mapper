@@ -1,4 +1,4 @@
-package com.joanzapata.mapper.model;
+package com.jzapata.mapper.model;
 
 public class BookEntry {
 

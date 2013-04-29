@@ -112,7 +112,6 @@ public final class Mapper {
         while (currentClass != Object.class) {
             for (Method setterMethod : currentClass.getMethods()) {
                 if (setterMethod.getName().startsWith("set")) {
-
                     // Find a getter for this setter
                     Method getterMethod = MapperUtil.findGetter(source, setterMethod);
                     if (getterMethod == null) {

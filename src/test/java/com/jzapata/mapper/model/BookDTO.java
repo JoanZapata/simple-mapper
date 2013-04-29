@@ -1,4 +1,4 @@
-package com.joanzapata.mapper.model;
+package com.jzapata.mapper.model;
 
 import java.util.List;
 
