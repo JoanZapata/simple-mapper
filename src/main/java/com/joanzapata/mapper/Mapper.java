@@ -54,14 +54,14 @@ public final class Mapper {
      */
     public <D> D map(Object source, Class<D> destinationClass) {
         if (source instanceof Iterable)
-            return (D) mapIterable((Iterable) source, destinationClass);
+            return (D) map((Iterable) source, destinationClass);
 
         MappingContext context = new MappingContext(mappings);
         return map(source, destinationClass, context);
     }
 
     /** Same as {@link #map(Object, Class)}, but applies to iterables objects. */
-    public <D, U> List<D> mapIterable(Iterable<U> source, Class<D> destinationClass) {
+    public <D, U> List<D> map(Iterable<U> source, Class<D> destinationClass) {
         return mapIterable(source, destinationClass, new MappingContext(mappings));
     }
 

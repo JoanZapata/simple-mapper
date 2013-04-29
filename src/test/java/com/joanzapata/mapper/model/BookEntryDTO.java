@@ -1,4 +1,4 @@
-package com.jzapata.mapper.model;
+package com.joanzapata.mapper.model;
 
 public class BookEntryDTO {
 

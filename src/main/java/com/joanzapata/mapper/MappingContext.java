@@ -36,7 +36,7 @@ class MappingContext {
         try {
             return destinationClass.newInstance();
         } catch (Exception e) {
-            throw new RuntimeException("Unable to create instance of " + destinationClass.getName());
+            throw new RuntimeException("Unable to create instance of " + destinationClass.getName() + ", please check there is a public no-arg constructor.");
         }
     }
 

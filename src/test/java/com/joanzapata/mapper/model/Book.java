@@ -1,4 +1,4 @@
-package com.jzapata.mapper.model;
+package com.joanzapata.mapper.model;
 
 import java.util.List;
 
@@ -9,6 +9,8 @@ public class Book {
     private String name;
 
     private List<BookEntry> entries;
+
+    public Book() { }
 
     public Book(Long id, String name) {
         this.id = id;

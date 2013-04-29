@@ -1,6 +1,6 @@
-package com.jzapata.mapper.model.entry;
+package com.joanzapata.mapper.model.entry;
 
-import com.jzapata.mapper.model.BookEntryDTO;
+import com.joanzapata.mapper.model.BookEntryDTO;
 
 public class AddressEntryDTO extends BookEntryDTO {
 

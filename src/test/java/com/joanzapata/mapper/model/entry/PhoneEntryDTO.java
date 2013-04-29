@@ -1,8 +1,8 @@
-package com.jzapata.mapper.model.entry;
+package com.joanzapata.mapper.model.entry;
 
-import com.jzapata.mapper.model.BookEntry;
+import com.joanzapata.mapper.model.BookEntryDTO;
 
-public class PhoneEntry extends BookEntry {
+public class PhoneEntryDTO extends BookEntryDTO {
 
     private String phoneNumber;
 
