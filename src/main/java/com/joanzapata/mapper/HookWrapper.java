@@ -1,23 +1,27 @@
 package com.joanzapata.mapper;
 
+import java.lang.reflect.Method;
+
 class HookWrapper<S, D> {
 
     private Hook<S, D> hook;
 
-    private Class<S> sourceClass;
-
-    private Class<D> destinationClass;
-
-    HookWrapper(Hook<S, D> hook, Class<S> source, Class<D> destination) {
+    HookWrapper(Hook<S, D> hook) {
         this.hook = hook;
-        this.sourceClass = source;
-        this.destinationClass = destination;
     }
 
     public void apply(Object source, Object destination) {
-        if (sourceClass.isAssignableFrom(source.getClass()) &&
-                destinationClass.isAssignableFrom(destination.getClass())) {
-            applySafe((S) source, (D) destination);
+        for (Method method : hook.getClass().getMethods()) {
+            if ("extraMapping".equals(method.getName())) {
+                Class<?>[] parameterTypes = method.getParameterTypes();
+                Class<?> sourceClass = parameterTypes[0];
+                Class<?> destinationClass = parameterTypes[1];
+                if (sourceClass.isAssignableFrom(source.getClass()) &&
+                        destinationClass.isAssignableFrom(destination.getClass())) {
+                    applySafe((S) source, (D) destination);
+                }
+                return;
+            }
         }
     }
 

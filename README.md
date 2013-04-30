@@ -23,8 +23,7 @@ Then include it in your ```pom.xml```
 </dependency>
 ```
 
-# How to use
-
+# Basics
 
 For the basics, just provide the source object and the destination:
 
@@ -39,6 +38,8 @@ To convert a list, exactly the same:
  List<BookDTO> bookListDTO = mapper.map(bookList, BookDTO.class);
 ```
 
+# Inheritance
+
 If you need support for inheritance, you must provide the mappings of the subclasses:
 
 ```java
@@ -47,7 +48,7 @@ Mapper mapper = new Mapper()
     .addMapping(PhoneEntry.class, PhoneEntryDTO.class);
 ```
 
-You can get a bidirectionnal mapper by using the ```addBidirectionalMapping``` method:
+Note that you can register mapping in both directions by using the ```addBidirectionalMapping``` method:
 
 ```java
 Mapper mapper = new Mapper()
@@ -55,4 +56,25 @@ Mapper mapper = new Mapper()
     .addBidirectionalMapping(PhoneEntry.class, PhoneEntryDTO.class);
 ```
 
+# Name binding
+
 The mapper supports name variations, that means for example that ```public Book getBook()``` can be used to fill ```public void setBookDTO(BookDTO bookDTO)```. The library currently manage ```DTO``` and ```BO``` accessor suffixes. 
+
+# Hooks
+
+You can easily provide hooks on some mappings.
+
+```java
+Mapper mapper = new Mapper()
+    .addHook(new Hook<BookEntry, BookEntryDTO>() {
+        @Override
+        public void extraMapping(BookEntry source, BookEntryDTO destination) {
+            // Do something in the destination object
+        }
+    };
+});
+```
+
+> Hooks are called **after** the object has been fully mapped.
+
+> Hooks are guarantied to be called in the **order** you added them to the mapper. 

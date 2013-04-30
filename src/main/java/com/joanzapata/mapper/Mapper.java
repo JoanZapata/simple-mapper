@@ -50,13 +50,11 @@ public final class Mapper {
 
     /**
      * Add a hook to the mapping process. This hook will be called after the complete mapping of the object.
-     * @param sourceClass      The concerned source class. It will match all subclasses.
-     * @param destinationClass The concerned destination class. It will match all subclasses.
-     * @param hook             The hook object.
+     * @param hook The hook object.
      * @return The current mapper for chaining.
      */
-    public <S, D> Mapper addHook(Class<S> sourceClass, Class<D> destinationClass, Hook<S, D> hook) {
-        hooks.add(new HookWrapper(hook, sourceClass, destinationClass));
+    public <S, D> Mapper addHook(Hook<S, D> hook) {
+        hooks.add(new HookWrapper(hook));
         return this;
     }
 

@@ -129,7 +129,7 @@ public class MapperTest {
     @Test
     public void testHook() {
         Mapper mapper = new Mapper()
-                .addHook(Book.class, BookDTO.class, new Hook<Book, BookDTO>() {
+                .addHook(new Hook<Book, BookDTO>() {
                     @Override
                     public void extraMapping(Book from, BookDTO to) {
                         to.setName("ItWorks.");
@@ -143,7 +143,7 @@ public class MapperTest {
     @Test
     public void testHookWithInheritance() {
         Mapper mapper = new Mapper()
-                .addHook(BookEntry.class, BookEntryDTO.class, new Hook<BookEntry, BookEntryDTO>() {
+                .addHook(new Hook<BookEntry, BookEntryDTO>() {
                     @Override
                     public void extraMapping(BookEntry from, BookEntryDTO to) {
                         to.setId(1337);
