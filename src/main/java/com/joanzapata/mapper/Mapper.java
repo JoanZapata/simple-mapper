@@ -9,12 +9,15 @@ public final class Mapper {
 
     private final Map<Class, Class> mappings;
 
-    private boolean throwExceptionIfPropertyNotFoundInSource = false;
+    private final List<String> knownSuffixes = Arrays.asList("DTO", "BO");
 
-    private List<String> knownSuffixes = Arrays.asList("DTO", "BO");
+    private final List<HookWrapper> hooks;
+
+    private boolean throwExceptionIfPropertyNotFoundInSource = false;
 
     public Mapper() {
         mappings = new HashMap<Class, Class>();
+        hooks = new ArrayList<HookWrapper>();
     }
 
     /**
@@ -31,7 +34,7 @@ public final class Mapper {
      * You shouldn't need this unless you're using inheritance.
      * @param sourceClass      The source class.
      * @param destinationClass The destination class.
-     * @return the current mapper.
+     * @return The current mapper for chaining.
      */
     public Mapper addMapping(Class<?> sourceClass, Class<?> destinationClass) {
         mappings.put(sourceClass, destinationClass);
@@ -42,6 +45,18 @@ public final class Mapper {
     public Mapper addBidirectionalMapping(Class<?> sourceClass, Class<?> destinationClass) {
         addMapping(sourceClass, destinationClass);
         addMapping(destinationClass, sourceClass);
+        return this;
+    }
+
+    /**
+     * Add a hook to the mapping process. This hook will be called after the complete mapping of the object.
+     * @param sourceClass      The concerned source class. It will match all subclasses.
+     * @param destinationClass The concerned destination class. It will match all subclasses.
+     * @param hook             The hook object.
+     * @return The current mapper for chaining.
+     */
+    public <S, D> Mapper addHook(Class<S> sourceClass, Class<D> destinationClass, Hook<S, D> hook) {
+        hooks.add(new HookWrapper(hook, sourceClass, destinationClass));
         return this;
     }
 
@@ -111,6 +126,7 @@ public final class Mapper {
         while (currentClass != Object.class) {
             for (Method setterMethod : currentClass.getMethods()) {
                 if (setterMethod.getName().startsWith("set")) {
+
                     // Find a getter for this setter
                     Method getterMethod = MapperUtil.findGetter(source, setterMethod, knownSuffixes);
                     if (getterMethod == null) {
@@ -128,7 +144,6 @@ public final class Mapper {
                             // NOTE This is a recursive call, but the stack is unlikely to explode 
                             // because the cyclic dependencies are managed, and the depth of a model 
                             // isn't supposed to get that high.
-                            System.out.println(setterMethod.getName());
                             Object mappedObjectBeingTransferred = map(objectBeingTransferred, setterMethod.getGenericParameterTypes()[0], setterMethod.getParameterTypes()[0], context);
 
                             // Apply setter
@@ -142,6 +157,13 @@ public final class Mapper {
             }
             currentClass = currentClass.getSuperclass();
         }
+
+        // Apply hooks if possible
+        for (HookWrapper hook : hooks) {
+            hook.apply(source, destinationInstance);
+        }
+
+        // Then return the constructed object
         return destinationInstance;
 
     }

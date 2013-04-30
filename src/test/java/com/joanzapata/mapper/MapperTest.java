@@ -126,6 +126,35 @@ public class MapperTest {
         Assert.assertEquals(in.getTestOther(), out.getTestOtherDTO());
     }
 
+    @Test
+    public void testHook() {
+        Mapper mapper = new Mapper()
+                .addHook(Book.class, BookDTO.class, new Hook<Book, BookDTO>() {
+                    @Override
+                    public void extraMapping(Book from, BookDTO to) {
+                        to.setName("ItWorks.");
+                    }
+                });
+        Book testBook = createTestBook();
+        BookDTO out = mapper.map(testBook, BookDTO.class);
+        assertEquals("ItWorks.", out.getName());
+    }
+
+    @Test
+    public void testHookWithInheritance() {
+        Mapper mapper = new Mapper()
+                .addHook(BookEntry.class, BookEntryDTO.class, new Hook<BookEntry, BookEntryDTO>() {
+                    @Override
+                    public void extraMapping(BookEntry from, BookEntryDTO to) {
+                        to.setId(1337);
+                    }
+                });
+        Book testBook = createTestBook();
+        BookDTO out = mapper.map(testBook, BookDTO.class);
+        assertEquals(1337, out.getEntries().get(0).getId());
+        assertEquals(1337, out.getEntries().get(1).getId());
+    }
+
     private Book createTestBook() {
         Book book = new Book(0L, "Book");
 
