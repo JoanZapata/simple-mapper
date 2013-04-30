@@ -3,16 +3,15 @@ package com.joanzapata.mapper;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class Mapper {
 
     private final Map<Class, Class> mappings;
 
     private boolean throwExceptionIfPropertyNotFoundInSource = false;
+
+    private List<String> knownSuffixes = Arrays.asList("DTO", "BO");
 
     public Mapper() {
         mappings = new HashMap<Class, Class>();
@@ -113,7 +112,7 @@ public final class Mapper {
             for (Method setterMethod : currentClass.getMethods()) {
                 if (setterMethod.getName().startsWith("set")) {
                     // Find a getter for this setter
-                    Method getterMethod = MapperUtil.findGetter(source, setterMethod);
+                    Method getterMethod = MapperUtil.findGetter(source, setterMethod, knownSuffixes);
                     if (getterMethod == null) {
                         if (throwExceptionIfPropertyNotFoundInSource) {
                             throw new PropertyNotFoundException("Unable to find a getter for " + setterMethod.getName() + " method in " + source.getClass().getCanonicalName());
@@ -129,6 +128,7 @@ public final class Mapper {
                             // NOTE This is a recursive call, but the stack is unlikely to explode 
                             // because the cyclic dependencies are managed, and the depth of a model 
                             // isn't supposed to get that high.
+                            System.out.println(setterMethod.getName());
                             Object mappedObjectBeingTransferred = map(objectBeingTransferred, setterMethod.getGenericParameterTypes()[0], setterMethod.getParameterTypes()[0], context);
 
                             // Apply setter

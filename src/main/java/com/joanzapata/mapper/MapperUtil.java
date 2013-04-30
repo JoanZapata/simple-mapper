@@ -1,10 +1,7 @@
 package com.joanzapata.mapper;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 final class MapperUtil {
 
@@ -22,7 +19,7 @@ final class MapperUtil {
      * @param setter The setter method.
      * @return the corresponding getter method given the setter method, or null if nothing found.
      */
-    public static Method findGetter(Object source, Method setter) {
+    public static Method findGetter(Object source, Method setter, List<String> knownSuffixes) {
 
         // A setter must have 1 parameter
         if (setter.getParameterTypes().length != 1) {
@@ -34,26 +31,38 @@ final class MapperUtil {
             return null;
         }
 
-        String getterMethodName = "get" + setter.getName().substring(3);
-        String getterMethodNameForBooleans = "is" + setter.getName().substring(3);
+        String expectedGetterName = "get" + setter.getName().substring(3);
+        String expectedGetterNameForBooleans = "is" + setter.getName().substring(3);
 
         Class loopClass = source.getClass();
         while (loopClass != Object.class) {
             for (Method method : loopClass.getMethods()) {
-                // If it's the exact name, return the getter
-                // getBookBO() should be valid for setBookDTO() and vice versa, so...
-                if (method.getParameterTypes().length == 0 && (getterMethodName.equals(method.getName()) ||
-                        getterMethodNameForBooleans.equals(method.getName()) ||
-                        getterMethodName.startsWith(method.getName()) ||
-                        method.getName().startsWith(getterMethodName) ||
-                        getterMethodNameForBooleans.startsWith(method.getName()) ||
-                        method.getName().startsWith(getterMethodNameForBooleans))) {
+                if (method.getParameterTypes().length != 0) continue;
+
+                String methodName = method.getName();
+                if (knownSuffixes != null) {
+                    expectedGetterName = removeSuffix(expectedGetterName, knownSuffixes);
+                    methodName = removeSuffix(methodName, knownSuffixes);
+                }
+
+                if (expectedGetterName.equals(method.getName()) ||
+                        expectedGetterNameForBooleans.equals(method.getName())) {
                     return method;
                 }
             }
             loopClass = loopClass.getSuperclass();
         }
         return null;
+    }
+
+    public static String removeSuffix(String expectedGetterName, List<String> knownSuffixes) {
+        for (String suffix : knownSuffixes) {
+            if (expectedGetterName.endsWith(suffix)) {
+                return expectedGetterName.substring(0,
+                        expectedGetterName.length() - suffix.length());
+            }
+        }
+        return expectedGetterName;
     }
 
     public static <D> D mapNativeTypeOrNull(Object source, Class<D> destinationClass) {

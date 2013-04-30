@@ -55,4 +55,4 @@ Mapper mapper = new Mapper()
     .addBidirectionalMapping(PhoneEntry.class, PhoneEntryDTO.class);
 ```
 
-The mapper supports name variations, that means for example that ```public Book getBook()``` can be used to fill ```public void setBookDTO(BookDTO bookDTO)```. For the moment it's just a ```startsWith``` comparison but later on it should be able to check the type names and validate the variations in the accessor names.
+The mapper supports name variations, that means for example that ```public Book getBook()``` can be used to fill ```public void setBookDTO(BookDTO bookDTO)```. The library currently manage ```DTO``` and ```BO``` accessor suffixes. 

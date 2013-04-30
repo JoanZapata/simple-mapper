@@ -118,6 +118,14 @@ public class MapperTest {
                 newBook.getEntries().get(1).getId());
     }
 
+    @Test
+    public void nameVariations() {
+        NameVariationTest in = new NameVariationTest();
+        NameVariationTestDTO out = new Mapper().map(in, NameVariationTestDTO.class);
+        Assert.assertEquals(in.getTest(), out.getTestDTO());
+        Assert.assertEquals(in.getTestOther(), out.getTestOtherDTO());
+    }
+
     private Book createTestBook() {
         Book book = new Book(0L, "Book");
 
@@ -141,5 +149,29 @@ public class MapperTest {
 
     public static class B {
         public void setName(String name) { }
+    }
+
+    public static class NameVariationTest {
+        String test = "Test", testOther = "TestOther";
+
+        public String getTest() { return test; }
+
+        public void setTest(String test) { this.test = test; }
+
+        public String getTestOther() { return testOther; }
+
+        public void setTestOther(String testOther) { this.testOther = testOther; }
+    }
+
+    public static class NameVariationTestDTO {
+        String testDTO, testOtherDTO;
+
+        public String getTestDTO() { return testDTO; }
+
+        public void setTestDTO(String testDTO) { this.testDTO = testDTO;}
+
+        public String getTestOtherDTO() { return testOtherDTO; }
+
+        public void setTestOtherDTO(String testOtherDTO) { this.testOtherDTO = testOtherDTO; }
     }
 }
