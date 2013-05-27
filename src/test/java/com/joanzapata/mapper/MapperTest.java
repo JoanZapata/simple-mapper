@@ -12,7 +12,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -155,6 +157,15 @@ public class MapperTest {
         assertEquals(1337, out.getEntries().get(1).getId());
     }
 
+    @Test
+    public void testMapMapping() {
+        Mapper mapper = new Mapper();
+        Book testBook = createTestBook();
+        BookDTO out = mapper.map(testBook, BookDTO.class);
+        assertEquals(1L, out.getEntriesById().get(1L).getId());
+        assertEquals(2L, out.getEntriesById().get(2L).getId());
+    }
+
     private Book createTestBook() {
         Book book = new Book(0L, "Book");
 
@@ -170,6 +181,12 @@ public class MapperTest {
         entry2.setCountry("France");
 
         book.setEntries(Arrays.asList(entry1, entry2));
+
+        Map<Long, BookEntry> map = new HashMap<Long, BookEntry>();
+        map.put(entry1.getId(), entry1);
+        map.put(entry2.getId(), entry2);
+        book.setEntriesById(map);
+
         return book;
     }
 

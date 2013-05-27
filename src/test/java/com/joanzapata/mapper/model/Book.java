@@ -1,6 +1,7 @@
 package com.joanzapata.mapper.model;
 
 import java.util.List;
+import java.util.Map;
 
 public class Book {
 
@@ -9,6 +10,8 @@ public class Book {
     private String name;
 
     private List<BookEntry> entries;
+
+    private Map<Long, BookEntry> entriesById;
 
     public Book() { }
 
@@ -23,6 +26,14 @@ public class Book {
 
     public void setEntries(List<BookEntry> entries) {
         this.entries = entries;
+    }
+
+    public Map<Long, BookEntry> getEntriesById() {
+        return entriesById;
+    }
+
+    public void setEntriesById(Map<Long, BookEntry> entriesById) {
+        this.entriesById = entriesById;
     }
 
     public Long getId() {

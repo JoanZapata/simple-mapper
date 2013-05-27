@@ -1,6 +1,7 @@
 package com.joanzapata.mapper.model;
 
 import java.util.List;
+import java.util.Map;
 
 public class BookDTO {
 
@@ -10,8 +11,18 @@ public class BookDTO {
 
     private List<BookEntryDTO> entries;
 
+    private Map<Long, BookEntryDTO> entriesById;
+
     public List<BookEntryDTO> getEntries() {
         return entries;
+    }
+
+    public Map<Long, BookEntryDTO> getEntriesById() {
+        return entriesById;
+    }
+
+    public void setEntriesById(Map<Long, BookEntryDTO> entriesById) {
+        this.entriesById = entriesById;
     }
 
     public void setEntries(List<BookEntryDTO> entries) {

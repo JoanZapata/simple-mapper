@@ -67,7 +67,6 @@ public final class Mapper {
     public <D> D map(Object source, Class<D> destinationClass) {
         if (source instanceof Iterable)
             return (D) map((Iterable) source, destinationClass);
-
         MappingContext context = new MappingContext(mappings);
         return map(source, destinationClass, context);
     }
@@ -77,10 +76,25 @@ public final class Mapper {
         return mapIterable(source, destinationClass, new MappingContext(mappings));
     }
 
+    /** Same as {@link #map(Object, Class)}, but applies to map objects. */
+    public <KS, VS, KD, VD> Map<KD, VD> map(Map<KS, VS> source, Class<KD> destinationKeyClass, Class<VD> destinationValueClass) {
+        return mapMap(source, destinationKeyClass, destinationValueClass, new MappingContext(mappings));
+    }
+
     private <D, U> List<D> mapIterable(Iterable<U> source, Class<D> destinationClass, MappingContext context) {
         List<D> out = new ArrayList<D>();
         for (Object s : source) {
             out.add(map(s, destinationClass, context));
+        }
+        return out;
+    }
+
+    private <KS, VS, KD, VD> Map<KD, VD> mapMap(Map<KS, VS> source, Class<KD> keyClass, Class<VD> valueClass, MappingContext context) {
+        Map<KD, VD> out = new HashMap<KD, VD>();
+        for (Map.Entry<KS, VS> s : source.entrySet()) {
+            KD mappedKey = map(s.getKey(), keyClass, context);
+            VD mappedValue = map(s.getValue(), valueClass, context);
+            out.put(mappedKey, mappedValue);
         }
         return out;
     }
@@ -100,6 +114,12 @@ public final class Mapper {
         if (source instanceof Iterable) {
             ParameterizedType type = (ParameterizedType) field;
             return (D) mapIterable((Iterable) source, (Class) type.getActualTypeArguments()[0], context);
+        }
+
+        if (source instanceof Map) {
+            ParameterizedType type = (ParameterizedType) field;
+            return (D) mapMap((Map) source, (Class) type.getActualTypeArguments()[0],
+                    (Class) type.getActualTypeArguments()[1], context);
         }
 
         // First, use already existing if possible (prevents cyclic mapping)

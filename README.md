@@ -35,7 +35,15 @@ BookDTO bookDTO = mapper.map(book, BookDTO.class);
 To convert a list, exactly the same:
 
 ```java
- List<BookDTO> bookListDTO = mapper.map(bookList, BookDTO.class);
+List<BookDTO> bookListDTO = mapper.map(bookList, BookDTO.class);
+```
+
+To convert a map, you need to specify both the key type and the value type.
+
+```java
+Map<Long, Book> bookInput = new HashMap<Long, Book>();
+...
+Map<Long, BookDTO> bookListDTO = mapper.map(bookMap, Long.class, BookDTO.class);
 ```
 
 # Inheritance
