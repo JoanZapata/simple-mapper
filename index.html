@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=640" />
+
+    <link rel="stylesheet" href="stylesheets/core.css" media="screen"/>
+    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)"/>
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+
+    <script type="text/javascript" src="javascripts/modernizr.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $('#main_content').headsmart()
+      })
+    </script>
+    <title>Simple-mapper by JoanZapata</title>
+  </head>
+
+  <body>
+    <a id="forkme_banner" href="https://github.com/JoanZapata/simple-mapper">View on GitHub</a>
+    <div class="shell">
+
+      <header>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <h1>Simple-mapper</h1>
+            <h2>A very simple POJO mapper based on getters/setters with inheritance support.</h2>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+      </header>
+
+      <section id="downloads">
+        <span class="inner">
+          <a href="https://github.com/JoanZapata/simple-mapper/zipball/master" class="zip"><em>download</em> .ZIP</a><a href="https://github.com/JoanZapata/simple-mapper/tarball/master" class="tgz"><em>download</em> .TGZ</a>
+        </span>
+      </section>
+
+
+      <span class="banner-fix"></span>
+
+
+      <section id="main_content">
+        <h1>Simple Mapper</h1>
+
+<blockquote>
+<p>Note that this is a <strong>0.0.1-SNAPSHOT</strong> versions, it hasn't been deeply tested at all. I'm using it because I'm tired of big mapping frameworks when all I need is a very basic mapping between business objects and lightweight DTOs with the same structure.</p>
+</blockquote>
+
+<p><strong>Simple Mapper</strong> is a java objects mapper meant to be very easy-to-use and intuitive. It looks for setters in the destination object and try to find the corresponding getter in the source object. It manages <code>cyclic dependencies</code> and <code>inheritance</code>.</p>
+
+<h1>Get it</h1>
+
+<p>It's not in maven central yet, so you need to build it.</p>
+
+<pre lang="shell"><code>git clone https://github.com/JoanZapata/simple-mapper.git
+cd simple-mapper
+mvn install
+</code></pre>
+
+<p>Then include it in your <code>pom.xml</code></p>
+
+<div class="highlight"><pre><span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.joanzapata.mapper<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>simple-mapper<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>0.0.1-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</pre></div>
+
+<h1>Basics</h1>
+
+<p>For the basics, just provide the source object and the destination:</p>
+
+<div class="highlight"><pre><span class="n">Mapper</span> <span class="n">mapper</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Mapper</span><span class="o">();</span>
+<span class="n">BookDTO</span> <span class="n">bookDTO</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">book</span><span class="o">,</span> <span class="n">BookDTO</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</pre></div>
+
+<p>To convert a list, exactly the same:</p>
+
+<div class="highlight"><pre> <span class="n">List</span><span class="o">&lt;</span><span class="n">BookDTO</span><span class="o">&gt;</span> <span class="n">bookListDTO</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">bookList</span><span class="o">,</span> <span class="n">BookDTO</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</pre></div>
+
+<h1>Inheritance</h1>
+
+<p>If you need support for inheritance, you must provide the mappings of the subclasses:</p>
+
+<div class="highlight"><pre><span class="n">Mapper</span> <span class="n">mapper</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Mapper</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">addMapping</span><span class="o">(</span><span class="n">AddressEntry</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">AddressEntryDTO</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">addMapping</span><span class="o">(</span><span class="n">PhoneEntry</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">PhoneEntryDTO</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</pre></div>
+
+<p>Note that you can register mapping in both directions by using the <code>addBidirectionalMapping</code> method:</p>
+
+<div class="highlight"><pre><span class="n">Mapper</span> <span class="n">mapper</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Mapper</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">addBidirectionalMapping</span><span class="o">(</span><span class="n">AddressEntry</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">AddressEntryDTO</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">addBidirectionalMapping</span><span class="o">(</span><span class="n">PhoneEntry</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">PhoneEntryDTO</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</pre></div>
+
+<h1>Name binding</h1>
+
+<p>The mapper supports name variations, that means for example that <code>public Book getBook()</code> can be used to fill <code>public void setBookDTO(BookDTO bookDTO)</code>. The library currently manage <code>DTO</code> and <code>BO</code> accessor suffixes. </p>
+
+<h1>Hooks</h1>
+
+<p>You can easily provide hooks on some mappings.</p>
+
+<div class="highlight"><pre><span class="n">Mapper</span> <span class="n">mapper</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Mapper</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">addHook</span><span class="o">(</span><span class="k">new</span> <span class="n">Hook</span><span class="o">&lt;</span><span class="n">BookEntry</span><span class="o">,</span> <span class="n">BookEntryDTO</span><span class="o">&gt;()</span> <span class="o">{</span>
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">extraMapping</span><span class="o">(</span><span class="n">BookEntry</span> <span class="n">source</span><span class="o">,</span> <span class="n">BookEntryDTO</span> <span class="n">destination</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">// Do something in the destination object</span>
+        <span class="o">}</span>
+    <span class="o">};</span>
+<span class="o">});</span>
+</pre></div>
+
+<blockquote>
+<p>Hooks are called <strong>after</strong> the object has been fully mapped.</p>
+
+<p>Hooks are guarantied to be called in the <strong>order</strong> you added them to the mapper. </p>
+</blockquote>
+      </section>
+
+      <footer>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <p>this project by <a href="https://github.com/JoanZapata">JoanZapata</a> can be found on <a href="https://github.com/JoanZapata/simple-mapper">GitHub</a></p>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+        <p>Generated with <a href="http://pages.github.com">GitHub Pages</a> using Merlot</p>
+        <span class="octocat"></span>
+      </footer>
+
+    </div>
+
+    
+  </body>
+</html>
