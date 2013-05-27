@@ -15,8 +15,11 @@
     <version>1.0.0</version>
     <name>Simple Mapper</name>
     <packaging>jar</packaging>
-    <description>A very simple POJO mapper based on getters/setters with support for inheritance, cyclic dependencies, manual mapping hooks.</description>
+    <description>A very simple POJO mapper based on getters/setters with support for inheritance, cyclic dependencies,
+        manual mapping hooks.
+    </description>
     <url>http://joanzapata.com/simple-mapper/</url>
+    <inceptionYear>2013</inceptionYear>
 
     <licenses>
         <license>
@@ -63,6 +66,24 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <!-- Checks for license headers. Use "mvn license:format" to update files. -->
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <version>1.10.b1</version>
+                <configuration>
+                    <header>src/etc/header.txt</header>
+                    <excludes>
+                        <exclude>.idea/**</exclude>
+                        <exclude>src/etc/HOW-TO.txt</exclude>
+                        <exclude>LICENSE.txt</exclude>
+                        <exclude>.gitignore</exclude>
+                        <exclude>README.txt</exclude>
+                    </excludes>
+                    <strictCheck>true</strictCheck>
                 </configuration>
             </plugin>
         </plugins>
