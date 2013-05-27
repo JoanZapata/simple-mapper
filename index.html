@@ -82,7 +82,14 @@ mvn install
 
 <p>To convert a list, exactly the same:</p>
 
-<div class="highlight"><pre> <span class="n">List</span><span class="o">&lt;</span><span class="n">BookDTO</span><span class="o">&gt;</span> <span class="n">bookListDTO</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">bookList</span><span class="o">,</span> <span class="n">BookDTO</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+<div class="highlight"><pre><span class="n">List</span><span class="o">&lt;</span><span class="n">BookDTO</span><span class="o">&gt;</span> <span class="n">bookListDTO</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">bookList</span><span class="o">,</span> <span class="n">BookDTO</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</pre></div>
+
+<p>To convert a map, you need to specify both the key type and the value type.</p>
+
+<div class="highlight"><pre><span class="n">Map</span><span class="o">&lt;</span><span class="n">Long</span><span class="o">,</span> <span class="n">Book</span><span class="o">&gt;</span> <span class="n">bookInput</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">Long</span><span class="o">,</span> <span class="n">Book</span><span class="o">&gt;();</span>
+<span class="o">...</span>
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">Long</span><span class="o">,</span> <span class="n">BookDTO</span><span class="o">&gt;</span> <span class="n">bookListDTO</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">bookMap</span><span class="o">,</span> <span class="n">Long</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">BookDTO</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
 </pre></div>
 
 <h1>Inheritance</h1>
