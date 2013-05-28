@@ -1,48 +1,33 @@
 # Simple Mapper 
-> Note that this is a **0.0.1-SNAPSHOT** versions, it hasn't been deeply tested at all. I'm using it because I'm tired of big mapping frameworks when all I need is a very basic mapping between business objects and lightweight DTOs with the same structure.
+> I created this library because I'm tired of big xml-based or annotation-based mapping frameworks when all I need is a **very basic mapping** between business objects and lightweight DTOs with a similar structure.
 
-**Simple Mapper** is a java objects mapper meant to be very easy-to-use and intuitive. It looks for setters in the destination object and try to find the corresponding getter in the source object. It manages ```cyclic dependencies``` and ```inheritance```.
+**Simple Mapper** is a java objects mapper meant to be very easy-to-use and intuitive. It looks for setters in the destination object and try to find the corresponding getter in the source object. It manages ```cyclic dependencies```, ```inheritance```, and ```hooks```.
 
 # Get it
 
-It's not in maven central yet, so you need to build it.
-
-```shell
-git clone https://github.com/JoanZapata/simple-mapper.git
-cd simple-mapper
-mvn install
-```
-
-Then include it in your ```pom.xml```
+Simple Mapper is **available in Maven Central**:
 
 ```xml
 <dependency>
     <groupId>com.joanzapata.mapper</groupId>
     <artifactId>simple-mapper</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
 # Basics
 
-For the basics, just provide the source object and the destination:
+You do all the mapping with the ```Mapper``` object and its ```map()``` method.
 
 ```java
+// First, create a ```Mapper``` object.
 Mapper mapper = new Mapper();
+
+// Map a plain old java object with map()
 BookDTO bookDTO = mapper.map(book, BookDTO.class);
-```
 
-To convert a list, exactly the same:
-
-```java
+// Mapper will detect lists and maps so you can do things like:
 List<BookDTO> bookListDTO = mapper.map(bookList, BookDTO.class);
-```
-
-To convert a map, you need to specify both the key type and the value type.
-
-```java
-Map<Long, Book> bookInput = new HashMap<Long, Book>();
-...
 Map<Long, BookDTO> bookListDTO = mapper.map(bookMap, Long.class, BookDTO.class);
 ```
 
@@ -56,33 +41,26 @@ Mapper mapper = new Mapper()
     .addMapping(PhoneEntry.class, PhoneEntryDTO.class);
 ```
 
-Note that you can register mapping in both directions by using the ```addBidirectionalMapping``` method:
-
-```java
-Mapper mapper = new Mapper()
-    .addBidirectionalMapping(AddressEntry.class, AddressEntryDTO.class)
-    .addBidirectionalMapping(PhoneEntry.class, PhoneEntryDTO.class);
-```
+> You can register mapping in both directions by using the ```addBidirectionalMapping``` method:
 
 # Name binding
 
-The mapper supports name variations, that means for example that ```public Book getBook()``` can be used to fill ```public void setBookDTO(BookDTO bookDTO)```. The library currently manage ```DTO``` and ```BO``` accessor suffixes. 
+The mapper supports name variations, that means for example that ```public Book getBook()``` in the source object is considered as a valid candidate for ```public void setBookDTO(BookDTO bookDTO)``` in the destination object. The library currently manage ```DTO``` and ```BO``` accessor suffixes.
 
 # Hooks
 
-You can easily provide hooks on some mappings.
+If you need custom mapping or additional operations after some mappings, you can provide hooks:
 
 ```java
 Mapper mapper = new Mapper()
     .addHook(new Hook<BookEntry, BookEntryDTO>() {
         @Override
         public void extraMapping(BookEntry source, BookEntryDTO destination) {
-            // Do something in the destination object
+            // Do additional operations in the destination object
         }
     };
 });
 ```
 
-> Hooks are called **after** the object has been fully mapped.
-
-> Hooks are guarantied to be called in the **order** you added them to the mapper. 
+* Hooks are called **after** the object has been fully mapped.
+* Hooks are guaranteed to be called in the **order** you added them to the mapper. 
