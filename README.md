@@ -41,11 +41,11 @@ Mapper mapper = new Mapper()
     .addMapping(PhoneEntry.class, PhoneEntryDTO.class);
 ```
 
-> You can register mapping in both directions by using the ```addBidirectionalMapping``` method:
+* You can register mapping in both directions by using the ```addBidirectionalMapping``` method.
 
 # Name binding
 
-The mapper supports name variations, that means for example that ```public Book getBook()``` in the source object is considered as a valid candidate for ```public void setBookDTO(BookDTO bookDTO)``` in the destination object. The library currently manage ```DTO``` and ```BO``` accessor suffixes.
+The mapper supports name variations, that means for example that ```public Book getBook()``` in the source object is considered as a valid candidate for ```public void setBookDTO(BookDTO bookDTO)``` in the destination object. The library currently manage ```DTO``` and ```BO``` name variations.
 
 # Hooks
 
