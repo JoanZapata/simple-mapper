@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class MapperTest {
 
@@ -182,6 +183,12 @@ public class MapperTest {
         BookDTO out = mapper.map(testBook, BookDTO.class);
         assertEquals(1L, out.getEntriesById().get(1L).getId());
         assertEquals(2L, out.getEntriesById().get(2L).getId());
+    }
+
+    @Test
+    public void testNull(){
+        Mapper mapper = new Mapper();
+        assertNull(mapper.map(null, BookDTO.class));
     }
 
     private Book createTestBook() {

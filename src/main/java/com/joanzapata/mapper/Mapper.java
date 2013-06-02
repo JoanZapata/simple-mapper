@@ -100,6 +100,7 @@ public final class Mapper {
     }
 
     private <D, U> List<D> mapIterable(Iterable<U> source, Class<D> destinationClass, MappingContext context) {
+        if (source == null) return null;
         List<D> out = new ArrayList<D>();
         for (Object s : source) {
             out.add(map(s, destinationClass, context));
@@ -108,6 +109,7 @@ public final class Mapper {
     }
 
     private <KS, VS, KD, VD> Map<KD, VD> mapMap(Map<KS, VS> source, Class<KD> keyClass, Class<VD> valueClass, MappingContext context) {
+        if (source == null) return null;
         Map<KD, VD> out = new HashMap<KD, VD>();
         for (Map.Entry<KS, VS> s : source.entrySet()) {
             KD mappedKey = map(s.getKey(), keyClass, context);
@@ -129,6 +131,8 @@ public final class Mapper {
      * @return The mapped source object.
      */
     private <D> D map(Object source, Type field, Class<D> destinationClass, MappingContext context) {
+        if (source == null) return null;
+
         if (source instanceof Iterable) {
             ParameterizedType type = (ParameterizedType) field;
             return (D) mapIterable((Iterable) source, (Class) type.getActualTypeArguments()[0], context);
