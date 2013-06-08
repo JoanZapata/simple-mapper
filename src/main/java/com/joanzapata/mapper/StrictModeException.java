@@ -18,9 +18,9 @@
  */
 package com.joanzapata.mapper;
 
-public class PropertyNotFoundException extends RuntimeException {
+public class StrictModeException extends RuntimeException {
 
-    public PropertyNotFoundException(String s) {
+    public StrictModeException(String s) {
         super(s);
     }
 }

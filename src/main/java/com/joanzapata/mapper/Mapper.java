@@ -23,15 +23,18 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import static com.joanzapata.mapper.MapperUtil.*;
+import static java.util.Arrays.asList;
+
 public final class Mapper {
 
     private final Map<Class, Class> mappings;
 
-    private final List<String> knownSuffixes = Arrays.asList("DTO", "BO");
+    private final List<String> knownSuffixes = asList("DTO", "BO");
 
     private final List<HookWrapper> hooks;
 
-    private boolean throwExceptionIfPropertyNotFoundInSource = false;
+    private boolean strictMode = false;
 
     public Mapper() {
         mappings = new HashMap<Class, Class>();
@@ -40,10 +43,10 @@ public final class Mapper {
 
     /**
      * If set to true and not getter is found for a property,
-     * a PropertyNotFoundException will be thrown. <b>Default is false.</b>
+     * a StrictModeException will be thrown. <b>Default is false.</b>
      */
-    public Mapper setThrowExceptionIfPropertyNotFoundInSource(boolean throwExceptionIfPropertyNotFoundInSource) {
-        this.throwExceptionIfPropertyNotFoundInSource = throwExceptionIfPropertyNotFoundInSource;
+    public Mapper setStrictMode(boolean strictMode) {
+        this.strictMode = strictMode;
         return this;
     }
 
@@ -86,7 +89,7 @@ public final class Mapper {
         if (source instanceof Iterable)
             return (D) map((Iterable) source, destinationClass);
         MappingContext context = new MappingContext(mappings);
-        return map(source, destinationClass, context);
+        return nominalMap(source, destinationClass, context);
     }
 
     /** Same as {@link #map(Object, Class)}, but applies to iterables objects. */
@@ -103,7 +106,7 @@ public final class Mapper {
         if (source == null) return null;
         List<D> out = new ArrayList<D>();
         for (Object s : source) {
-            out.add(map(s, destinationClass, context));
+            out.add(nominalMap(s, destinationClass, context));
         }
         return out;
     }
@@ -112,25 +115,27 @@ public final class Mapper {
         if (source == null) return null;
         Map<KD, VD> out = new HashMap<KD, VD>();
         for (Map.Entry<KS, VS> s : source.entrySet()) {
-            KD mappedKey = map(s.getKey(), keyClass, context);
-            VD mappedValue = map(s.getValue(), valueClass, context);
+            KD mappedKey = nominalMap(s.getKey(), keyClass, context);
+            VD mappedValue = nominalMap(s.getValue(), valueClass, context);
             out.put(mappedKey, mappedValue);
         }
         return out;
     }
 
-    private <D> D map(Object source, Class<D> destinationClass, MappingContext context) {
-        return map(source, null, destinationClass, context);
+    private <D> D nominalMap(Object source, Class<D> destinationClass, MappingContext context) {
+        // This is the entry point of the nominal mapping process.
+        // Special cases directly provided by the user (lists, etc...) must have been processed before.
+        return nominalMap(source, null, destinationClass, context);
     }
 
     /**
      * @param source           The source object.
-     * @param field            Generic type for generic fields.
+     * @param field            Generic type of the target field
      * @param destinationClass The destination class.
      * @param context          The mapping context.
      * @return The mapped source object.
      */
-    private <D> D map(Object source, Type field, Class<D> destinationClass, MappingContext context) {
+    private <D> D nominalMap(Object source, Type field, Class<D> destinationClass, MappingContext context) {
         if (source == null) return null;
 
         if (source instanceof Iterable) {
@@ -156,56 +161,53 @@ public final class Mapper {
             return nativeMapped;
         }
 
-        // Otherwise, find appropriate instance
-        Class<D> bestDestinationClass = MapperUtil.findBestDestinationType(source.getClass(), destinationClass, context);
+        // Otherwise, create appropriate instance and store it in context
+        Class<D> bestDestinationClass = findBestDestinationType(source.getClass(), destinationClass, context);
         D destinationInstance = context.createInstanceForDestination(bestDestinationClass);
         context.putAlreadyMapped(source, destinationInstance);
 
-        // Then fill it (loop to get all methods, including superclass' ones)
-        Class currentClass = bestDestinationClass;
-        while (currentClass != Object.class) {
-            for (Method setterMethod : currentClass.getMethods()) {
-                if (setterMethod.getName().startsWith("set")) {
+        for (Method setterMethod : findAllSetterMethods(bestDestinationClass)) {
 
-                    // Find a getter for this setter
-                    Method getterMethod = MapperUtil.findGetter(source, setterMethod, knownSuffixes);
-                    if (getterMethod == null) {
-                        if (throwExceptionIfPropertyNotFoundInSource) {
-                            throw new PropertyNotFoundException("Unable to find a getter for " + setterMethod.getName() + " method in " + source.getClass().getCanonicalName());
-                        } else continue;
-                    }
+            Method getterMethod = findGetter(source, setterMethod, knownSuffixes);
 
-                    try {
-
-                        // Apply getter
-                        Object objectBeingTransferred = getterMethod.invoke(source);
-
-                        if (objectBeingTransferred != null) {
-                            // NOTE This is a recursive call, but the stack is unlikely to explode 
-                            // because the cyclic dependencies are managed, and the depth of a model 
-                            // isn't supposed to get that high.
-                            Object mappedObjectBeingTransferred = map(objectBeingTransferred, setterMethod.getGenericParameterTypes()[0], setterMethod.getParameterTypes()[0], context);
-
-                            // Apply setter
-                            setterMethod.invoke(destinationInstance, mappedObjectBeingTransferred);
-                        }
-
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+            if (getterMethod == null) {
+                if (strictMode) {
+                    throw new StrictModeException("No suitable getter for "
+                            + setterMethod.getName() + "() method in "
+                            + source.getClass().getCanonicalName());
+                } else continue;
             }
-            currentClass = currentClass.getSuperclass();
+
+            try {
+
+                Object objectBeingTransferred = getterMethod.invoke(source);
+
+                if (objectBeingTransferred == null) {
+                    continue;
+                }
+
+                // NOTE This is a recursive call, but the stack is unlikely to explode
+                // because the cyclic dependencies are managed, and the depth of a model
+                // isn't supposed to get that high.
+                Object mappedObjectBeingTransferred = nominalMap(objectBeingTransferred,
+                        setterMethod.getGenericParameterTypes()[0],
+                        setterMethod.getParameterTypes()[0],
+                        context);
+
+                // Apply setter
+                setterMethod.invoke(destinationInstance, mappedObjectBeingTransferred);
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
-        // Apply hooks if possible
+        // Apply hooks if applicable
         for (HookWrapper hook : hooks) {
             hook.apply(source, destinationInstance);
         }
 
-        // Then return the constructed object
         return destinationInstance;
-
     }
 
 }

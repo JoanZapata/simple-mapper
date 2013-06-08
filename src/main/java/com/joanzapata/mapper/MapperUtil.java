@@ -109,4 +109,22 @@ final class MapperUtil {
                 explicitMapping.isAssignableFrom(destinationClass)) ?
                 destinationClass : explicitMapping;
     }
+
+    /**
+     * Find all accessible methods in the given class and its superclass(es)
+     * that start with "set".
+     * @param ofClass The class to retrieve the methods from.
+     * @return A list of methods, an empty list if no method found.
+     */
+    public static List<Method> findAllSetterMethods(Class<?> ofClass) {
+        List<Method> methods = new ArrayList<Method>();
+        Class currentClass = ofClass;
+        while (currentClass != Object.class) {
+            for (Method method : currentClass.getMethods())
+                if (method.getName().startsWith("set"))
+                    methods.add(method);
+            currentClass = currentClass.getSuperclass();
+        }
+        return methods;
+    }
 }

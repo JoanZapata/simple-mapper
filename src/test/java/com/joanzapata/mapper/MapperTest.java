@@ -110,10 +110,10 @@ public class MapperTest {
         assertEquals(bookDTO, addressEntryDTO.getBookDTO());
     }
 
-    @Test(expected = PropertyNotFoundException.class)
+    @Test(expected = StrictModeException.class)
     public void throwExceptionIfPropertyNotFoundInSource() {
         new Mapper()
-                .setThrowExceptionIfPropertyNotFoundInSource(true)
+                .setStrictMode(true)
                 .map(new A(), B.class);
     }
 
