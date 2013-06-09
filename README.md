@@ -65,7 +65,6 @@ Mapper mapper = new Mapper()
 * Hooks are called **after** the object has been fully mapped.
 * Hooks are guaranteed to be called in the **order** you added them to the mapper. 
 
-
 # Strict Mode
 
 When using ```StrictMode```, the mapper raises a ```StrictModeException``` if it's unable to fulfill a property in the destination object.
