@@ -11,7 +11,7 @@ Simple Mapper is **available in Maven Central**:
 <dependency>
     <groupId>com.joanzapata.mapper</groupId>
     <artifactId>simple-mapper</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 
