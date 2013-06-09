@@ -28,6 +28,8 @@ import com.joanzapata.mapper.model.entry.PhoneEntry;
 import com.joanzapata.mapper.model.entry.PhoneEntryDTO;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,8 +41,11 @@ import static org.junit.Assert.assertNull;
 
 public class MapperTest {
 
+    private final Logger logger = LoggerFactory.getLogger(MapperTest.class);
+
     @Test
     public void singleObject() {
+        logger.info("singleObject");
         Mapper mapper = new Mapper();
         Book book = new Book(5L, "Book");
         BookDTO bookDTO = mapper.map(book, BookDTO.class);
@@ -50,6 +55,7 @@ public class MapperTest {
 
     @Test
     public void singleObjectList() {
+        logger.info("singleObjectList");
         Mapper mapper = new Mapper();
         Book b1 = new Book(1L, "Book1");
         Book b2 = new Book(2L, "Book2");
@@ -63,6 +69,7 @@ public class MapperTest {
 
     @Test
     public void objectWithCyclicDependencies() {
+        logger.info("objectWithCyclicDependencies");
 
         Book book = new Book(0L, "Book");
         BookEntry entry1 = new BookEntry(1, book);
@@ -83,6 +90,7 @@ public class MapperTest {
 
     @Test
     public void inheritance() {
+        logger.info("inheritance");
         Book book = createTestBook();
 
         Mapper mapper = new Mapper()
@@ -112,6 +120,7 @@ public class MapperTest {
 
     @Test(expected = StrictModeException.class)
     public void throwExceptionIfPropertyNotFoundInSource() {
+        logger.info("throwExceptionIfPropertyNotFoundInSource");
         new Mapper()
                 .strictMode(true)
                 .map(new A(), B.class);
@@ -119,11 +128,13 @@ public class MapperTest {
 
     @Test
     public void bidirectionalMappings() {
+        logger.info("bidirectionalMappings");
         Book book = createTestBook();
 
         Mapper mapper = new Mapper()
                 .biMapping(AddressEntry.class, AddressEntryDTO.class)
-                .biMapping(PhoneEntry.class, PhoneEntryDTO.class);
+                .biMapping(PhoneEntry.class, PhoneEntryDTO.class)
+                .strictMode(true);
 
         BookDTO bookDTO = mapper.map(book, BookDTO.class);
         Book newBook = mapper.map(bookDTO, Book.class);
@@ -141,6 +152,7 @@ public class MapperTest {
 
     @Test
     public void nameVariations() {
+        logger.info("nameVariations");
         NameVariationTest in = new NameVariationTest();
         NameVariationTestDTO out = new Mapper().map(in, NameVariationTestDTO.class);
         Assert.assertEquals(in.getTest(), out.getTestDTO());
@@ -149,6 +161,7 @@ public class MapperTest {
 
     @Test
     public void testHook() {
+        logger.info("testHook");
         Mapper mapper = new Mapper()
                 .hook(new Hook<Book, BookDTO>() {
                     @Override
@@ -163,6 +176,7 @@ public class MapperTest {
 
     @Test
     public void testHookWithInheritance() {
+        logger.info("testHookWithInheritance");
         Mapper mapper = new Mapper()
                 .hook(new Hook<BookEntry, BookEntryDTO>() {
                     @Override
@@ -178,6 +192,7 @@ public class MapperTest {
 
     @Test
     public void testMapMapping() {
+        logger.info("testMapMapping");
         Mapper mapper = new Mapper();
         Book testBook = createTestBook();
         BookDTO out = mapper.map(testBook, BookDTO.class);
@@ -187,29 +202,49 @@ public class MapperTest {
 
     @Test
     public void testNull() {
+        logger.info("testNull");
         Mapper mapper = new Mapper();
         assertNull(mapper.map(null, BookDTO.class));
     }
 
     @Test
     public void testDirectMapMapping() {
+        logger.info("testDirectMapMapping");
+        Mapper mapper = new Mapper()
+                .biMapping(AddressEntry.class, AddressEntryDTO.class)
+                .biMapping(PhoneEntry.class, PhoneEntryDTO.class)
+                .strictMode(true);
 
+        Map<Long, Book> in = new HashMap<Long, Book>();
+        in.put(1L, createTestBook(1L));
+        in.put(2L, createTestBook(2L));
+
+        Map<Long, BookDTO> out = mapper.map(in, Long.class, BookDTO.class);
+        assertEquals(1l, (long) out.get(1L).getId());
+        assertEquals(2l, (long) out.get(2L).getId());
     }
 
-    @Test
+    @Test(expected = StrictModeException.class)
     public void testIncompatibleTypes() {
-
+        logger.info("testIncompatibleTypes");
+        final Mapper mapper = new Mapper().strictMode(true);
+        mapper.map(1L, Byte.class);
     }
 
     @Test(expected = StrictModeException.class)
     public void testDirectIncompatibleTypes() {
+        logger.info("testDirectIncompatibleTypes");
         Map<Long, String> input = new HashMap<Long, String>();
         input.put(1L, "1");
         Map<Long, BookDTO> incompatibleOutput = new Mapper().strictMode(true).map(input, Long.class, BookDTO.class);
     }
 
     private Book createTestBook() {
-        Book book = new Book(0L, "Book");
+        return createTestBook(0L);
+    }
+
+    private Book createTestBook(long id) {
+        Book book = new Book(id, "Book");
 
         PhoneEntry entry1 = new PhoneEntry();
         entry1.setBook(book);

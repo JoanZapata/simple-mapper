@@ -18,6 +18,9 @@
  */
 package com.joanzapata.mapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -29,7 +32,10 @@ import java.util.Map;
 import static com.joanzapata.mapper.MapperUtil.*;
 import static java.util.Arrays.asList;
 
+/** Create a new Mapper and map objects using the map() method. */
 public final class Mapper {
+
+    private final Logger logger = LoggerFactory.getLogger(Mapper.class);
 
     private final Map<Class, Class> mappings;
 
@@ -85,6 +91,7 @@ public final class Mapper {
 
     /**
      * Map the source object with the destination class using the getters/setters.
+     * This method is thread-safe.
      * @param source           The source object.
      * @param destinationClass The destination class.
      * @return A destination instance filled using its setters and the source getters.
@@ -132,13 +139,6 @@ public final class Mapper {
         return nominalMap(source, null, destinationClass, context);
     }
 
-    /**
-     * @param source           The source object.
-     * @param field            Generic type of the target field
-     * @param destinationClass The destination class.
-     * @param context          The mapping context.
-     * @return The mapped source object.
-     */
     private <D> D nominalMap(Object source, Type field, Class<D> destinationClass, MappingContext context) {
         if (source == null) return null;
 
@@ -170,6 +170,10 @@ public final class Mapper {
                     throw new StrictModeException("Unable to map "
                             + nativeMapped.getClass().getCanonicalName()
                             + " -> " + destinationClass.getCanonicalName());
+                } else {
+                    logger.debug("Incompatible types {} -> {}, ignore...",
+                            source.getClass().getSimpleName(),
+                            destinationClass.getSimpleName());
                 }
             }
         }
@@ -186,10 +190,23 @@ public final class Mapper {
             if (getterMethod == null) {
                 if (strictMode) {
                     throw new StrictModeException("No suitable getter for "
-                            + setterMethod.getName() + "() method in "
+                            + setterMethod.getDeclaringClass().getSimpleName()
+                            + "." + setterMethod.getName() + "() method in "
                             + source.getClass().getCanonicalName());
-                } else continue;
+                } else {
+                    logger.debug("No getter found for {}.{}() in {}, ignore...",
+                            setterMethod.getDeclaringClass().getSimpleName(),
+                            setterMethod.getName(),
+                            bestDestinationClass.getSimpleName());
+                    continue;
+                }
             }
+
+            logger.debug("{}.{}() -> {}.{}()",
+                    getterMethod.getDeclaringClass().getSimpleName(),
+                    getterMethod.getName(),
+                    setterMethod.getDeclaringClass().getSimpleName(),
+                    setterMethod.getName());
 
             try {
 

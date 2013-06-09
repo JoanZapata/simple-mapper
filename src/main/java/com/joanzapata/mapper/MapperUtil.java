@@ -38,7 +38,6 @@ final class MapperUtil {
      * @return the corresponding getter method given the setter method, or null if nothing found.
      */
     public static Method findGetter(Object source, Method setter, List<String> knownSuffixes) {
-
         // A setter must have 1 parameter
         if (setter.getParameterTypes().length != 1) {
             return null;
@@ -63,8 +62,8 @@ final class MapperUtil {
                     methodName = removeSuffix(methodName, knownSuffixes);
                 }
 
-                if (expectedGetterName.equals(method.getName()) ||
-                        expectedGetterNameForBooleans.equals(method.getName())) {
+                if (expectedGetterName.equals(methodName) ||
+                        expectedGetterNameForBooleans.equals(methodName)) {
                     return method;
                 }
             }
