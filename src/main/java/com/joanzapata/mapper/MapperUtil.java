@@ -83,7 +83,7 @@ final class MapperUtil {
         return expectedGetterName;
     }
 
-    public static <D> D mapNativeTypeOrNull(Object source, Class<D> destinationClass) {
+    public static <D> D mapPrimitiveTypeOrNull(Object source) {
         if (source instanceof Byte ||
                 source instanceof Short ||
                 source instanceof Integer ||
@@ -96,6 +96,23 @@ final class MapperUtil {
             return (D) source;
         }
         return null;
+    }
+
+    public static <D> boolean isCompatiblePrimitiveType(D destinationObject, Class<D> expectedClass) {
+        Class expectedClassAutoboxed = autoBox(expectedClass);
+        return expectedClassAutoboxed.isAssignableFrom(destinationObject.getClass());
+    }
+
+    private static Class<?> autoBox(Class<?> destinationClass) {
+        if (destinationClass == byte.class) return Byte.class;
+        if (destinationClass == short.class) return Short.class;
+        if (destinationClass == int.class) return Integer.class;
+        if (destinationClass == long.class) return Long.class;
+        if (destinationClass == float.class) return Float.class;
+        if (destinationClass == double.class) return Double.class;
+        if (destinationClass == boolean.class) return Boolean.class;
+        if (destinationClass == char.class) return Character.class;
+        return destinationClass;
     }
 
     /**
@@ -126,5 +143,11 @@ final class MapperUtil {
             currentClass = currentClass.getSuperclass();
         }
         return methods;
+    }
+
+    public static void applyHooks(List<HookWrapper> hooks, Object source, Object destination) {
+        for (HookWrapper hook : hooks) {
+            hook.apply(source, destination);
+        }
     }
 }

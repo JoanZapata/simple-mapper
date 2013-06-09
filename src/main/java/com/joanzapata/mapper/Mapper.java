@@ -21,7 +21,10 @@ package com.joanzapata.mapper;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.joanzapata.mapper.MapperUtil.*;
 import static java.util.Arrays.asList;
@@ -43,9 +46,10 @@ public final class Mapper {
 
     /**
      * If set to true and not getter is found for a property,
+     * or if types mismatch between getter and setter,
      * a StrictModeException will be thrown. <b>Default is false.</b>
      */
-    public Mapper setStrictMode(boolean strictMode) {
+    public Mapper strictMode(boolean strictMode) {
         this.strictMode = strictMode;
         return this;
     }
@@ -57,15 +61,15 @@ public final class Mapper {
      * @param destinationClass The destination class.
      * @return The current mapper for chaining.
      */
-    public Mapper addMapping(Class<?> sourceClass, Class<?> destinationClass) {
+    public Mapper mapping(Class<?> sourceClass, Class<?> destinationClass) {
         mappings.put(sourceClass, destinationClass);
         return this;
     }
 
-    /** Same as {@link #addMapping(Class, Class)} but adds the mapping in both directions. */
-    public Mapper addBidirectionalMapping(Class<?> sourceClass, Class<?> destinationClass) {
-        addMapping(sourceClass, destinationClass);
-        addMapping(destinationClass, sourceClass);
+    /** Same as {@link #mapping(Class, Class)} but adds the mapping in both directions. */
+    public Mapper biMapping(Class<?> sourceClass, Class<?> destinationClass) {
+        mapping(sourceClass, destinationClass);
+        mapping(destinationClass, sourceClass);
         return this;
     }
 
@@ -74,7 +78,7 @@ public final class Mapper {
      * @param hook The hook object.
      * @return The current mapper for chaining.
      */
-    public <S, D> Mapper addHook(Hook<S, D> hook) {
+    public <S, D> Mapper hook(Hook<S, D> hook) {
         hooks.add(new HookWrapper(hook));
         return this;
     }
@@ -156,9 +160,18 @@ public final class Mapper {
         }
 
         // Map native types if possible
-        D nativeMapped = MapperUtil.mapNativeTypeOrNull(source, destinationClass);
+        D nativeMapped = mapPrimitiveTypeOrNull(source);
         if (nativeMapped != null) {
-            return nativeMapped;
+            if (isCompatiblePrimitiveType(nativeMapped, destinationClass)) {
+                applyHooks(hooks, source, destinationClass);
+                return nativeMapped;
+            } else {
+                if (strictMode) {
+                    throw new StrictModeException("Unable to map "
+                            + nativeMapped.getClass().getCanonicalName()
+                            + " -> " + destinationClass.getCanonicalName());
+                }
+            }
         }
 
         // Otherwise, create appropriate instance and store it in context
@@ -202,11 +215,7 @@ public final class Mapper {
             }
         }
 
-        // Apply hooks if applicable
-        for (HookWrapper hook : hooks) {
-            hook.apply(source, destinationInstance);
-        }
-
+        applyHooks(hooks, source, destinationInstance);
         return destinationInstance;
     }
 

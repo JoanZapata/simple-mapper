@@ -37,11 +37,11 @@ If you need support for inheritance, you must provide the mappings of the subcla
 
 ```java
 Mapper mapper = new Mapper()
-    .addMapping(AddressEntry.class, AddressEntryDTO.class)
-    .addMapping(PhoneEntry.class, PhoneEntryDTO.class);
+    .mapping(AddressEntry.class, AddressEntryDTO.class)
+    .mapping(PhoneEntry.class, PhoneEntryDTO.class);
 ```
 
-* You can register mapping in both directions by using the ```addBidirectionalMapping``` method.
+* You can register mapping in both directions by using the ```biMapping``` method.
 
 # Name binding
 
@@ -53,7 +53,7 @@ If you need custom mapping or additional operations after some mappings, you can
 
 ```java
 Mapper mapper = new Mapper()
-    .addHook(new Hook<BookEntry, BookEntryDTO>() {
+    .hook(new Hook<BookEntry, BookEntryDTO>() {
         @Override
         public void extraMapping(BookEntry source, BookEntryDTO destination) {
             // Do additional operations in the destination object
@@ -64,6 +64,20 @@ Mapper mapper = new Mapper()
 
 * Hooks are called **after** the object has been fully mapped.
 * Hooks are guaranteed to be called in the **order** you added them to the mapper. 
+
+
+# Strict Mode
+
+When using ```StrictMode```, the mapper raises a ```StrictModeException``` if it's unable to fulfill a property in the destination object.
+* No getter found that matches a setter in the destination object.
+* Types mismatch between getter and setter.
+
+```java
+Mapper mapper = new Mapper().strictMode(true);
+```
+
+> ```StrictMode``` is **disabled** by default.
+
 # License
 
 ```

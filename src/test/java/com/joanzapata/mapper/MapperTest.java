@@ -86,8 +86,8 @@ public class MapperTest {
         Book book = createTestBook();
 
         Mapper mapper = new Mapper()
-                .addMapping(AddressEntry.class, AddressEntryDTO.class)
-                .addMapping(PhoneEntry.class, PhoneEntryDTO.class);
+                .mapping(AddressEntry.class, AddressEntryDTO.class)
+                .mapping(PhoneEntry.class, PhoneEntryDTO.class);
 
         BookDTO bookDTO = mapper.map(book, BookDTO.class);
 
@@ -113,7 +113,7 @@ public class MapperTest {
     @Test(expected = StrictModeException.class)
     public void throwExceptionIfPropertyNotFoundInSource() {
         new Mapper()
-                .setStrictMode(true)
+                .strictMode(true)
                 .map(new A(), B.class);
     }
 
@@ -122,8 +122,8 @@ public class MapperTest {
         Book book = createTestBook();
 
         Mapper mapper = new Mapper()
-                .addBidirectionalMapping(AddressEntry.class, AddressEntryDTO.class)
-                .addBidirectionalMapping(PhoneEntry.class, PhoneEntryDTO.class);
+                .biMapping(AddressEntry.class, AddressEntryDTO.class)
+                .biMapping(PhoneEntry.class, PhoneEntryDTO.class);
 
         BookDTO bookDTO = mapper.map(book, BookDTO.class);
         Book newBook = mapper.map(bookDTO, Book.class);
@@ -150,7 +150,7 @@ public class MapperTest {
     @Test
     public void testHook() {
         Mapper mapper = new Mapper()
-                .addHook(new Hook<Book, BookDTO>() {
+                .hook(new Hook<Book, BookDTO>() {
                     @Override
                     public void extraMapping(Book from, BookDTO to) {
                         to.setName("ItWorks.");
@@ -164,7 +164,7 @@ public class MapperTest {
     @Test
     public void testHookWithInheritance() {
         Mapper mapper = new Mapper()
-                .addHook(new Hook<BookEntry, BookEntryDTO>() {
+                .hook(new Hook<BookEntry, BookEntryDTO>() {
                     @Override
                     public void extraMapping(BookEntry from, BookEntryDTO to) {
                         to.setId(1337);
@@ -186,9 +186,26 @@ public class MapperTest {
     }
 
     @Test
-    public void testNull(){
+    public void testNull() {
         Mapper mapper = new Mapper();
         assertNull(mapper.map(null, BookDTO.class));
+    }
+
+    @Test
+    public void testDirectMapMapping() {
+
+    }
+
+    @Test
+    public void testIncompatibleTypes() {
+
+    }
+
+    @Test(expected = StrictModeException.class)
+    public void testDirectIncompatibleTypes() {
+        Map<Long, String> input = new HashMap<Long, String>();
+        input.put(1L, "1");
+        Map<Long, BookDTO> incompatibleOutput = new Mapper().strictMode(true).map(input, Long.class, BookDTO.class);
     }
 
     private Book createTestBook() {
