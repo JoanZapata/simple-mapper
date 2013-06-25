@@ -18,10 +18,7 @@
  */
 package com.joanzapata.mapper;
 
-import com.joanzapata.mapper.model.Book;
-import com.joanzapata.mapper.model.BookDTO;
-import com.joanzapata.mapper.model.BookEntry;
-import com.joanzapata.mapper.model.BookEntryDTO;
+import com.joanzapata.mapper.model.*;
 import com.joanzapata.mapper.model.entry.AddressEntry;
 import com.joanzapata.mapper.model.entry.AddressEntryDTO;
 import com.joanzapata.mapper.model.entry.PhoneEntry;
@@ -239,6 +236,22 @@ public class MapperTest {
         Map<Long, BookDTO> incompatibleOutput = new Mapper().strictMode(true).map(input, Long.class, BookDTO.class);
     }
 
+    @Test
+    public void testEnumDirect() {
+        Mapper mapper = new Mapper();
+        assertEquals(EnumSourceDTO.A, mapper.map(EnumSource.A, EnumSourceDTO.class));
+        assertEquals(EnumSourceDTO.B, mapper.map(EnumSource.B, EnumSourceDTO.class));
+        assertEquals(EnumSourceDTO.C, mapper.map(EnumSource.C, EnumSourceDTO.class));
+    }
+
+    @Test
+    public void testEnumIndirect() {
+        ModelWithEnum input = new ModelWithEnum();
+        Mapper mapper = new Mapper();
+        final ModelWithEnumDTO output = mapper.map(input, ModelWithEnumDTO.class);
+        assertEquals(ModelWithEnumDTO.MyEnumDTO.A, output.getMyEnumsDTO().get(0));
+    }
+
     private Book createTestBook() {
         return createTestBook(0L);
     }
@@ -267,34 +280,59 @@ public class MapperTest {
         return book;
     }
 
+    public static enum EnumSource {
+        A, B, C
+    }
+
+    public static enum EnumSourceDTO {
+        A, B, C
+    }
+
     public static class A {
     }
 
     public static class B {
-        public void setName(String name) { }
+        public void setName(String name) {
+        }
     }
 
     public static class NameVariationTest {
         String test = "Test", testOther = "TestOther";
 
-        public String getTest() { return test; }
+        public String getTest() {
+            return test;
+        }
 
-        public void setTest(String test) { this.test = test; }
+        public void setTest(String test) {
+            this.test = test;
+        }
 
-        public String getTestOther() { return testOther; }
+        public String getTestOther() {
+            return testOther;
+        }
 
-        public void setTestOther(String testOther) { this.testOther = testOther; }
+        public void setTestOther(String testOther) {
+            this.testOther = testOther;
+        }
     }
 
     public static class NameVariationTestDTO {
         String testDTO, testOtherDTO;
 
-        public String getTestDTO() { return testDTO; }
+        public String getTestDTO() {
+            return testDTO;
+        }
 
-        public void setTestDTO(String testDTO) { this.testDTO = testDTO;}
+        public void setTestDTO(String testDTO) {
+            this.testDTO = testDTO;
+        }
 
-        public String getTestOtherDTO() { return testOtherDTO; }
+        public String getTestOtherDTO() {
+            return testOtherDTO;
+        }
 
-        public void setTestOtherDTO(String testOtherDTO) { this.testOtherDTO = testOtherDTO; }
+        public void setTestOtherDTO(String testOtherDTO) {
+            this.testOtherDTO = testOtherDTO;
+        }
     }
 }
