@@ -1,3 +1,7 @@
+# 1.0.2
+
+* Managed enum types
+
 # 1.0.1
 
 * Managed null objects
