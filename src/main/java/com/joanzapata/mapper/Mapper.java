@@ -59,6 +59,16 @@ public final class Mapper {
     }
 
     /**
+     * Set the strict mode to true (false by default).
+     * If set to true and not getter is found for a property,
+     * or if types mismatch between getter and setter,
+     * a StrictModeException will be thrown.
+     */
+    public Mapper strictMode() {
+        return strictMode(true);
+    }
+
+    /**
      * Adds an explicit mapping from a source class to a destination class.
      * You shouldn't need this unless you're using inheritance.
      *
