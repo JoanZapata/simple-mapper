@@ -5,7 +5,7 @@
 
 # Get it
 
-Simple Mapper is **available in Maven Central**:
+Simple Mapper is **available in [Maven Central](http://search.maven.org/remotecontent?filepath=com/joanzapata/mapper/simple-mapper/1.0.3/simple-mapper-1.0.3.jar)**:
 
 ```xml
 <dependency>
