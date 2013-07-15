@@ -18,7 +18,6 @@
  */
 package com.joanzapata.mapper;
 
-import com.sun.deploy.util.OrderedHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
