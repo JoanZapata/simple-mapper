@@ -37,7 +37,7 @@ If you need support for inheritance, you must provide the mappings of the subcla
 
 ![Alt](https://raw.github.com/JoanZapata/simple-mapper/master/inheritance.png)
 
-```java
+```
 Mapper mapper = new Mapper()
     .mapping(B.class, B'.class)
     .mapping(C.class, C'.class);
