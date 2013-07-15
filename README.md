@@ -69,15 +69,15 @@ Mapper mapper = new Mapper()
 
 # Strict Mode
 
-When using ```StrictMode```, the mapper raises a ```StrictModeException``` if it's unable to fulfill a property in the destination object.
+The simple-mapper is very permissive by default. If something wrong happens mapping a property, it gives up and goes to the next property to map. You can override this behavior by setting the ```StrictMode```. In this mode, the ```map()``` function will raise a ```StrictModeException``` if something goes wrong:
 * No getter found that matches a setter in the destination object.
 * Types mismatch between getter and setter.
+* Destination object doesn't have an empty constructor.
+* Any other bad thing happens during the mapping.
 
 ```java
-Mapper mapper = new Mapper().strictMode(true);
+Mapper mapper = new Mapper().strictMode();
 ```
-
-> ```StrictMode``` is **disabled** by default.
 
 # License
 
