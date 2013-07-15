@@ -18,16 +18,14 @@
  */
 package com.joanzapata.mapper;
 
+import com.sun.deploy.util.OrderedHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.joanzapata.mapper.MapperUtil.*;
 import static java.util.Arrays.asList;
@@ -113,9 +111,10 @@ public final class Mapper {
         return nominalMap(source, destinationClass, context);
     }
 
-    /** Same as {@link #map(Object, Class)}, but applies to iterables objects. */
-    public <D, U> List<D> map(Iterable<U> source, Class<D> destinationClass) {
-        return mapIterable(source, destinationClass, new MappingContext(mappings));
+    /** Same as {@link #map(Object, Class)}, but applies to collections. */
+    public <D, U, CU extends Collection<U>, CD extends Collection<D>>
+    CD map(CU source, Class<D> destinationClass) {
+        return mapCollection(source, destinationClass, new MappingContext(mappings));
     }
 
     /** Same as {@link #map(Object, Class)}, but applies to map objects. */
@@ -123,9 +122,22 @@ public final class Mapper {
         return mapMap(source, destinationKeyClass, destinationValueClass, new MappingContext(mappings));
     }
 
-    private <D, U> List<D> mapIterable(Iterable<U> source, Class<D> destinationClass, MappingContext context) {
+    private <D, U, CD extends Collection<D>, CU extends Collection<U>>
+    CD mapCollection(CU source, Class<D> destinationClass, MappingContext context) {
         if (source == null) return null;
-        List<D> out = new ArrayList<D>();
+        // Instantiate the same type as the source
+        CD out;
+        if (source instanceof Set) {
+            out = (CD) new HashSet<D>();
+        } else if (source instanceof List) {
+            out = (CD) new ArrayList<D>();
+        } else if (source instanceof Queue) {
+            out = (CD) new LinkedList<D>();
+        } else {
+            if (strictMode) {
+                throw new StrictModeException("Unhandler type " + source.getClass().getName());
+            } else return null;
+        }
         for (Object s : source) {
             out.add(nominalMap(s, destinationClass, context));
         }
@@ -173,9 +185,9 @@ public final class Mapper {
     private <D> D nominalMap(Object source, Type field, Class<D> destinationClass, MappingContext context) {
         if (source == null) return null;
 
-        if (source instanceof Iterable) {
+        if (source instanceof Collection) {
             ParameterizedType type = (ParameterizedType) field;
-            return (D) mapIterable((Iterable) source, (Class) type.getActualTypeArguments()[0], context);
+            return (D) mapCollection((Collection) source, (Class) type.getActualTypeArguments()[0], context);
         }
 
         if (source instanceof Map) {

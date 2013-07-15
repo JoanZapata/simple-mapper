@@ -30,8 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class MapperTest {
 
@@ -198,7 +197,8 @@ public class MapperTest {
     public void testNull() {
         logger.info("testNull");
         Mapper mapper = new Mapper();
-        assertNull(mapper.map(null, BookDTO.class));
+        Object nullObject = null;
+        assertNull(mapper.map(nullObject, BookDTO.class));
     }
 
     @Test
@@ -285,6 +285,28 @@ public class MapperTest {
         input.setData(data);
         ModelWithString output = mapper.map(input, ModelWithString.class);
         assertNull(output.getData());
+    }
+
+    @Test
+    public void testSet() {
+        Mapper mapper = new Mapper().strictMode();
+        ModelWithSet input = new ModelWithSet();
+        final Set<String> data = new HashSet<String>();
+        data.add("Test");
+        input.setData(data);
+        ModelWithSet output = mapper.map(input, ModelWithSet.class);
+        assertTrue(output.getData().contains("Test"));
+        assertEquals(1, output.getData().size());
+    }
+
+    @Test
+    public void testSet_direct() {
+        Mapper mapper = new Mapper().strictMode();
+        Set<String> input = new HashSet<String>();
+        input.add("Test");
+        Set<String> output = mapper.map(input, String.class);
+        assertTrue(output.contains("Test"));
+        assertEquals(1, output.size());
     }
 
     private Book createTestBook() {
