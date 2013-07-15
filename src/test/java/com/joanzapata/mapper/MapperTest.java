@@ -28,10 +28,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -250,6 +247,44 @@ public class MapperTest {
         Mapper mapper = new Mapper();
         final ModelWithEnumDTO output = mapper.map(input, ModelWithEnumDTO.class);
         assertEquals(ModelWithEnumDTO.MyEnumDTO.A, output.getMyEnumsDTO().get(0));
+    }
+
+    @Test(expected = StrictModeException.class)
+    public void testIncompatibleTypesStringToList_strictMode() {
+        Mapper mapper = new Mapper().strictMode();
+        ModelWithString input = new ModelWithString();
+        input.setData("Test");
+        ModelWithCollection output = mapper.map(input, ModelWithCollection.class);
+    }
+
+    @Test
+    public void testIncompatibleTypesStringToList() {
+        Mapper mapper = new Mapper();
+        ModelWithString input = new ModelWithString();
+        input.setData("Test");
+        ModelWithCollection output = mapper.map(input, ModelWithCollection.class);
+        assertNull(output.getData());
+    }
+
+    @Test(expected = StrictModeException.class)
+    public void testIncompatibleTypesListToString_strictMode() {
+        Mapper mapper = new Mapper().strictMode();
+        ModelWithCollection input = new ModelWithCollection();
+        final ArrayList<String> data = new ArrayList<String>();
+        data.add("Test");
+        input.setData(data);
+        ModelWithString output = mapper.map(input, ModelWithString.class);
+    }
+
+    @Test
+    public void testIncompatibleTypesListToString() {
+        Mapper mapper = new Mapper();
+        ModelWithCollection input = new ModelWithCollection();
+        final ArrayList<String> data = new ArrayList<String>();
+        data.add("Test");
+        input.setData(data);
+        ModelWithString output = mapper.map(input, ModelWithString.class);
+        assertNull(output.getData());
     }
 
     private Book createTestBook() {

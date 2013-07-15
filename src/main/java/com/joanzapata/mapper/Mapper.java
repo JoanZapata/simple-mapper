@@ -32,15 +32,17 @@ import java.util.Map;
 import static com.joanzapata.mapper.MapperUtil.*;
 import static java.util.Arrays.asList;
 
-/**
- * Create a new Mapper and map objects using the map() method.
- */
+/** Create a new Mapper and map objects using the map() method. */
 public final class Mapper {
 
     private final Logger logger = LoggerFactory.getLogger(Mapper.class);
+
     private final Map<Class, Class> mappings;
+
     private final List<String> knownSuffixes = asList("DTO", "BO");
+
     private final List<HookWrapper> hooks;
+
     private boolean strictMode = false;
 
     public Mapper() {
@@ -71,7 +73,6 @@ public final class Mapper {
     /**
      * Adds an explicit mapping from a source class to a destination class.
      * You shouldn't need this unless you're using inheritance.
-     *
      * @param sourceClass      The source class.
      * @param destinationClass The destination class.
      * @return The current mapper for chaining.
@@ -81,9 +82,7 @@ public final class Mapper {
         return this;
     }
 
-    /**
-     * Same as {@link #mapping(Class, Class)} but adds the mapping in both directions.
-     */
+    /** Same as {@link #mapping(Class, Class)} but adds the mapping in both directions. */
     public Mapper biMapping(Class<?> sourceClass, Class<?> destinationClass) {
         mapping(sourceClass, destinationClass);
         mapping(destinationClass, sourceClass);
@@ -92,7 +91,6 @@ public final class Mapper {
 
     /**
      * Add a hook to the mapping process. This hook will be called after the complete mapping of the object.
-     *
      * @param hook The hook object.
      * @return The current mapper for chaining.
      */
@@ -104,7 +102,6 @@ public final class Mapper {
     /**
      * Map the source object with the destination class using the getters/setters.
      * This method is thread-safe.
-     *
      * @param source           The source object.
      * @param destinationClass The destination class.
      * @return A destination instance filled using its setters and the source getters.
@@ -116,16 +113,12 @@ public final class Mapper {
         return nominalMap(source, destinationClass, context);
     }
 
-    /**
-     * Same as {@link #map(Object, Class)}, but applies to iterables objects.
-     */
+    /** Same as {@link #map(Object, Class)}, but applies to iterables objects. */
     public <D, U> List<D> map(Iterable<U> source, Class<D> destinationClass) {
         return mapIterable(source, destinationClass, new MappingContext(mappings));
     }
 
-    /**
-     * Same as {@link #map(Object, Class)}, but applies to map objects.
-     */
+    /** Same as {@link #map(Object, Class)}, but applies to map objects. */
     public <KS, VS, KD, VD> Map<KD, VD> map(Map<KS, VS> source, Class<KD> destinationKeyClass, Class<VD> destinationValueClass) {
         return mapMap(source, destinationKeyClass, destinationValueClass, new MappingContext(mappings));
     }
@@ -270,7 +263,12 @@ public final class Mapper {
                 setterMethod.invoke(destinationInstance, mappedObjectBeingTransferred);
 
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                if (strictMode) {
+                    throw new StrictModeException("Unable to map "
+                            + setterMethod.getDeclaringClass().getSimpleName()
+                            + "." + setterMethod.getName() + "() method in "
+                            + source.getClass().getCanonicalName(), e);
+                }
             }
         }
 

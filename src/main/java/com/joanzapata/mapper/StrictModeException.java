@@ -23,4 +23,8 @@ public class StrictModeException extends RuntimeException {
     public StrictModeException(String s) {
         super(s);
     }
+
+    public StrictModeException(String s, Throwable throwable) {
+        super(s, throwable);
+    }
 }
