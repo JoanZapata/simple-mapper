@@ -35,10 +35,12 @@ Map<Long, BookDTO> bookListDTO = mapper.map(bookMap, Long.class, BookDTO.class);
 
 If you need support for inheritance, you must provide the mappings of the subclasses:
 
+![Alt](https://raw.github.com/JoanZapata/simple-mapper/master/inheritance.png)
+
 ```java
 Mapper mapper = new Mapper()
-    .mapping(AddressEntry.class, AddressEntryDTO.class)
-    .mapping(PhoneEntry.class, PhoneEntryDTO.class);
+    .mapping(B.class, B'.class)
+    .mapping(C.class, C'.class);
 ```
 
 * You can register mapping in both directions by using the ```biMapping``` method.
