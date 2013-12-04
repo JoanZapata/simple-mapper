@@ -20,20 +20,11 @@ package com.joanzapata.mapper;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import static com.joanzapata.mapper.Mapper.CustomMapperResult;
 
 final class MapperUtil {
-
-    public static final Collection createCollectionLike(Collection source) {
-        return new ArrayList();
-    }
-
-    public static final Map createMapLike(Map source) {
-        return new HashMap();
-    }
 
     /**
      * Find a getter on the source object for the given setter name.
@@ -152,5 +143,19 @@ final class MapperUtil {
         for (HookWrapper hook : hooks) {
             hook.apply(source, destination);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <D> CustomMapperResult<D> applyCustomMappers(List<CustomMapperWrapper> customMappers, Object source, Class<D> destinationClass) {
+        for (CustomMapperWrapper customMapper : customMappers) {
+            if (customMapper.isApplicable(source, destinationClass)) {
+                // Mapped has applied
+                final D destination = (D) customMapper.apply(source, destinationClass);
+                return new CustomMapperResult(destination);
+            }
+        }
+        // Mapped has not applied
+        return new CustomMapperResult();
+
     }
 }

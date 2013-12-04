@@ -1,3 +1,7 @@
+# 1.0.4
+
+* Added custom mappers
+
 # 1.0.3
 
 * Managed Set

@@ -48,14 +48,24 @@ public class MapperTest {
 
     @Test
     public void singleObjectWithCustomMapperToNull() {
-        Mapper mapper = new Mapper().customMapper(new CustomMapperToNull<Book, BookDTO>());
+        Mapper mapper = new Mapper().customMapper(new CustomMapper<Book, BookDTO>() {
+            @Override
+            public BookDTO map(Book source) {
+                return null;
+            }
+        });
         Book book = new Book(5L, "Book");
         assertNull(mapper.map(book, BookDTO.class));
     }
 
     @Test
     public void objectListWithCustomMapperToNull() {
-        Mapper mapper = new Mapper().customMapper(new CustomMapperToNull<Book, BookDTO>());
+        Mapper mapper = new Mapper().customMapper(new CustomMapper<Book, BookDTO>() {
+            @Override
+            public BookDTO map(Book source) {
+                return null;
+            }
+        });
         Book b1 = new Book(1L, "Book1");
         Book b2 = new Book(2L, "Book2");
         Book b3 = new Book(3L, "Book3");
@@ -66,7 +76,14 @@ public class MapperTest {
 
     @Test
     public void singleObjectWithCustomMapperToFixed() {
-        Mapper mapper = new Mapper().customMapper(new CustomMapperToFixed<Book>("Fixed"));
+        Mapper mapper = new Mapper().customMapper(new CustomMapper<Book, BookDTO>() {
+            @Override
+            public BookDTO map(Book source) {
+                final BookDTO bookDTO = new BookDTO();
+                bookDTO.setName("Fixed");
+                return bookDTO;
+            }
+        });
         Book book = new Book(5L, "Book");
         final BookDTO bookDto = mapper.map(book, BookDTO.class);
         assertEquals("Fixed", bookDto.getName());
@@ -74,7 +91,14 @@ public class MapperTest {
 
     @Test
     public void objectListWithCustomMapperToFixed() {
-        Mapper mapper = new Mapper().customMapper(new CustomMapperToFixed<Book>("Fixed"));
+        Mapper mapper = new Mapper().customMapper(new CustomMapper<Book, BookDTO>() {
+            @Override
+            public BookDTO map(Book source) {
+                final BookDTO bookDTO = new BookDTO();
+                bookDTO.setName("Fixed");
+                return bookDTO;
+            }
+        });
         Book b1 = new Book(1L, "Book1");
         Book b2 = new Book(2L, "Book2");
         Book b3 = new Book(3L, "Book3");
@@ -129,14 +153,14 @@ public class MapperTest {
         Mapper mapper = new Mapper()
                 .mapping(AddressEntry.class, AddressEntryDTO.class)
                 .mapping(PhoneEntry.class, PhoneEntryDTO.class)
-                .customMapper(new CustomMapper<PhoneEntry, AddressEntryDTO>() {
+                .customMapper(new CustomMapper<PhoneEntry, Object>() {
                     @Override
-                    public AddressEntryDTO map(PhoneEntry source) {
+                    public Object map(PhoneEntry source) {
                         fail("Shouldn't call this mapper");
                         return null;
                     }
                 });
-        BookDTO bookDTO = mapper.map(book, BookDTO.class);
+        mapper.map(book, BookDTO.class);
     }
 
     @Test
@@ -481,25 +505,4 @@ public class MapperTest {
         }
     }
 
-    public static class CustomMapperToNull<S, D> implements CustomMapper<S, D> {
-        @Override
-        public D map(S source) {
-            return null;
-        }
-    }
-
-    public class CustomMapperToFixed<S> implements CustomMapper<S, BookDTO> {
-        private String fixed;
-
-        public CustomMapperToFixed(String fixed) {
-            this.fixed = fixed;
-        }
-
-        @Override
-        public BookDTO map(S source) {
-            final BookDTO bookDTO = new BookDTO();
-            bookDTO.setName(fixed);
-            return bookDTO;
-        }
-    }
 }

@@ -162,7 +162,8 @@ public final class Mapper {
             } else return null;
         }
         for (Object s : source) {
-            out.add(nominalMap(s, destinationClass, context));
+            final D mappedElement = nominalMap(s, destinationClass, context);
+            if (mappedElement != null) out.add(mappedElement);
         }
         return out;
     }
@@ -228,6 +229,10 @@ public final class Mapper {
         if (alreadyMapped != null) {
             return alreadyMapped;
         }
+
+        // Try to find appropriate customMapper if any
+        CustomMapperResult<D> customMapperResult = MapperUtil.applyCustomMappers(customMappers, source, destinationClass);
+        if (customMapperResult.hasMatched) return customMapperResult.result;
 
         // Map native types if possible
         D nativeMapped = mapPrimitiveTypeOrNull(source);
@@ -311,4 +316,17 @@ public final class Mapper {
         return destinationInstance;
     }
 
+    public static class CustomMapperResult<T> {
+        boolean hasMatched = false;
+        T result = null;
+
+        // Success
+        public CustomMapperResult(T result) {
+            this.result = result;
+            this.hasMatched = true;
+        }
+
+        // Fail
+        public CustomMapperResult() {}
+    }
 }
