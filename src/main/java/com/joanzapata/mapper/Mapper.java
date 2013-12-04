@@ -24,7 +24,15 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 import static com.joanzapata.mapper.MapperUtil.*;
 import static java.util.Arrays.asList;
@@ -40,11 +48,14 @@ public final class Mapper {
 
     private final List<HookWrapper> hooks;
 
+    private final List<CustomMapperWrapper> customMappers;
+
     private boolean strictMode = false;
 
     public Mapper() {
         mappings = new HashMap<Class, Class>();
         hooks = new ArrayList<HookWrapper>();
+        customMappers = new ArrayList<CustomMapperWrapper>();
     }
 
     /**
@@ -93,6 +104,19 @@ public final class Mapper {
      */
     public <S, D> Mapper hook(Hook<S, D> hook) {
         hooks.add(new HookWrapper(hook));
+        return this;
+    }
+
+    /**
+     * Add a custom mapper to the mapping process. This custom mapper will be called when
+     * the mapper will need to transform an object of type S to an object of type D.
+     * @param customMapper Implement this interface to provide a mapping method from S to D.
+     * @param <S>          The source type.
+     * @param <D>          The destination type.
+     * @return The current mapper for chaining.
+     */
+    public <S, D> Mapper customMapper(CustomMapper<S, D> customMapper) {
+        customMappers.add(new CustomMapperWrapper(customMapper));
         return this;
     }
 

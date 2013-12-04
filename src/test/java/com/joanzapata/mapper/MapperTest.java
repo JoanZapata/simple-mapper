@@ -18,27 +18,129 @@
  */
 package com.joanzapata.mapper;
 
-import com.joanzapata.mapper.model.*;
+import com.joanzapata.mapper.model.Book;
+import com.joanzapata.mapper.model.BookDTO;
+import com.joanzapata.mapper.model.BookEntry;
+import com.joanzapata.mapper.model.BookEntryDTO;
+import com.joanzapata.mapper.model.ModelWithCollection;
+import com.joanzapata.mapper.model.ModelWithEnum;
+import com.joanzapata.mapper.model.ModelWithEnumDTO;
+import com.joanzapata.mapper.model.ModelWithSet;
+import com.joanzapata.mapper.model.ModelWithString;
 import com.joanzapata.mapper.model.entry.AddressEntry;
 import com.joanzapata.mapper.model.entry.AddressEntryDTO;
 import com.joanzapata.mapper.model.entry.PhoneEntry;
 import com.joanzapata.mapper.model.entry.PhoneEntryDTO;
 import org.junit.Assert;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
 public class MapperTest {
 
-    private final Logger logger = LoggerFactory.getLogger(MapperTest.class);
+    @Test
+    public void singleObjectWithCustomMapperToNull() {
+        Mapper mapper = new Mapper().customMapper(new CustomMapperToNull<Book, BookDTO>());
+        Book book = new Book(5L, "Book");
+        assertNull(mapper.map(book, BookDTO.class));
+    }
+
+    @Test
+    public void objectListWithCustomMapperToNull() {
+        Mapper mapper = new Mapper().customMapper(new CustomMapperToNull<Book, BookDTO>());
+        Book b1 = new Book(1L, "Book1");
+        Book b2 = new Book(2L, "Book2");
+        Book b3 = new Book(3L, "Book3");
+        List<Book> bookList = Arrays.asList(b1, b2, b3);
+        List<BookDTO> bookListDTO = mapper.map(bookList, BookDTO.class);
+        assertTrue(bookListDTO.isEmpty());
+    }
+
+    @Test
+    public void singleObjectWithCustomMapperToFixed() {
+        Mapper mapper = new Mapper().customMapper(new CustomMapperToFixed<Book>("Fixed"));
+        Book book = new Book(5L, "Book");
+        final BookDTO bookDto = mapper.map(book, BookDTO.class);
+        assertEquals("Fixed", bookDto.getName());
+    }
+
+    @Test
+    public void objectListWithCustomMapperToFixed() {
+        Mapper mapper = new Mapper().customMapper(new CustomMapperToFixed<Book>("Fixed"));
+        Book b1 = new Book(1L, "Book1");
+        Book b2 = new Book(2L, "Book2");
+        Book b3 = new Book(3L, "Book3");
+        List<Book> bookList = Arrays.asList(b1, b2, b3);
+        List<BookDTO> bookListDTO = mapper.map(bookList, BookDTO.class);
+        for (BookDTO bookDTO : bookListDTO) {
+            assertEquals("Fixed", bookDTO.getName());
+        }
+    }
+
+    @Test
+    public void inheritanceWithCustomMapperToNull() {
+        Book book = createTestBook();
+        Mapper mapper = new Mapper()
+                .mapping(AddressEntry.class, AddressEntryDTO.class)
+                .mapping(PhoneEntry.class, PhoneEntryDTO.class)
+                .customMapper(new CustomMapper<PhoneEntry, PhoneEntryDTO>() {
+                    @Override
+                    public PhoneEntryDTO map(PhoneEntry source) {
+                        return null;
+                    }
+                });
+
+        BookDTO bookDTO = mapper.map(book, BookDTO.class);
+        assertEquals(1, bookDTO.getEntries().size());
+    }
+
+    @Test
+    public void inheritanceWithCustomMapperToFixed() {
+        Book book = createTestBook();
+        Mapper mapper = new Mapper()
+                .mapping(AddressEntry.class, AddressEntryDTO.class)
+                .mapping(PhoneEntry.class, PhoneEntryDTO.class)
+                .customMapper(new CustomMapper<PhoneEntry, PhoneEntryDTO>() {
+                    @Override
+                    public PhoneEntryDTO map(PhoneEntry source) {
+                        final PhoneEntryDTO phoneEntryDTO = new PhoneEntryDTO();
+                        phoneEntryDTO.setPhoneNumber("Fixed");
+                        return phoneEntryDTO;
+                    }
+                });
+
+        BookDTO bookDTO = mapper.map(book, BookDTO.class);
+        assertEquals(2, bookDTO.getEntries().size());
+        assertTrue(bookDTO.getEntries().get(0) instanceof PhoneEntryDTO);
+        assertEquals("Fixed", ((PhoneEntryDTO) bookDTO.getEntries().get(0)).getPhoneNumber());
+    }
+
+    @Test
+    public void inheritanceWithUncalledCustomMapper() {
+        Book book = createTestBook();
+        Mapper mapper = new Mapper()
+                .mapping(AddressEntry.class, AddressEntryDTO.class)
+                .mapping(PhoneEntry.class, PhoneEntryDTO.class)
+                .customMapper(new CustomMapper<PhoneEntry, AddressEntryDTO>() {
+                    @Override
+                    public AddressEntryDTO map(PhoneEntry source) {
+                        fail("Shouldn't call this mapper");
+                        return null;
+                    }
+                });
+        BookDTO bookDTO = mapper.map(book, BookDTO.class);
+    }
 
     @Test
     public void singleObject() {
-        logger.info("singleObject");
         Mapper mapper = new Mapper();
         Book book = new Book(5L, "Book");
         BookDTO bookDTO = mapper.map(book, BookDTO.class);
@@ -48,7 +150,6 @@ public class MapperTest {
 
     @Test
     public void singleObjectList() {
-        logger.info("singleObjectList");
         Mapper mapper = new Mapper();
         Book b1 = new Book(1L, "Book1");
         Book b2 = new Book(2L, "Book2");
@@ -62,8 +163,6 @@ public class MapperTest {
 
     @Test
     public void objectWithCyclicDependencies() {
-        logger.info("objectWithCyclicDependencies");
-
         Book book = new Book(0L, "Book");
         BookEntry entry1 = new BookEntry(1, book);
         BookEntry entry2 = new BookEntry(2, book);
@@ -83,7 +182,6 @@ public class MapperTest {
 
     @Test
     public void inheritance() {
-        logger.info("inheritance");
         Book book = createTestBook();
 
         Mapper mapper = new Mapper()
@@ -113,7 +211,6 @@ public class MapperTest {
 
     @Test(expected = StrictModeException.class)
     public void throwExceptionIfPropertyNotFoundInSource() {
-        logger.info("throwExceptionIfPropertyNotFoundInSource");
         new Mapper()
                 .strictMode(true)
                 .map(new A(), B.class);
@@ -121,7 +218,6 @@ public class MapperTest {
 
     @Test
     public void bidirectionalMappings() {
-        logger.info("bidirectionalMappings");
         Book book = createTestBook();
 
         Mapper mapper = new Mapper()
@@ -145,7 +241,6 @@ public class MapperTest {
 
     @Test
     public void nameVariations() {
-        logger.info("nameVariations");
         NameVariationTest in = new NameVariationTest();
         NameVariationTestDTO out = new Mapper().map(in, NameVariationTestDTO.class);
         Assert.assertEquals(in.getTest(), out.getTestDTO());
@@ -154,7 +249,6 @@ public class MapperTest {
 
     @Test
     public void testHook() {
-        logger.info("testHook");
         Mapper mapper = new Mapper()
                 .hook(new Hook<Book, BookDTO>() {
                     @Override
@@ -169,7 +263,6 @@ public class MapperTest {
 
     @Test
     public void testHookWithInheritance() {
-        logger.info("testHookWithInheritance");
         Mapper mapper = new Mapper()
                 .hook(new Hook<BookEntry, BookEntryDTO>() {
                     @Override
@@ -185,7 +278,6 @@ public class MapperTest {
 
     @Test
     public void testMapMapping() {
-        logger.info("testMapMapping");
         Mapper mapper = new Mapper();
         Book testBook = createTestBook();
         BookDTO out = mapper.map(testBook, BookDTO.class);
@@ -195,7 +287,6 @@ public class MapperTest {
 
     @Test
     public void testNull() {
-        logger.info("testNull");
         Mapper mapper = new Mapper();
         Object nullObject = null;
         assertNull(mapper.map(nullObject, BookDTO.class));
@@ -203,7 +294,6 @@ public class MapperTest {
 
     @Test
     public void testDirectMapMapping() {
-        logger.info("testDirectMapMapping");
         Mapper mapper = new Mapper()
                 .biMapping(AddressEntry.class, AddressEntryDTO.class)
                 .biMapping(PhoneEntry.class, PhoneEntryDTO.class)
@@ -220,14 +310,12 @@ public class MapperTest {
 
     @Test(expected = StrictModeException.class)
     public void testIncompatibleTypes() {
-        logger.info("testIncompatibleTypes");
         final Mapper mapper = new Mapper().strictMode(true);
         mapper.map(1L, Byte.class);
     }
 
     @Test(expected = StrictModeException.class)
     public void testDirectIncompatibleTypes() {
-        logger.info("testDirectIncompatibleTypes");
         Map<Long, String> input = new HashMap<Long, String>();
         input.put(1L, "1");
         Map<Long, BookDTO> incompatibleOutput = new Mapper().strictMode(true).map(input, Long.class, BookDTO.class);
@@ -390,6 +478,28 @@ public class MapperTest {
 
         public void setTestOtherDTO(String testOtherDTO) {
             this.testOtherDTO = testOtherDTO;
+        }
+    }
+
+    public static class CustomMapperToNull<S, D> implements CustomMapper<S, D> {
+        @Override
+        public D map(S source) {
+            return null;
+        }
+    }
+
+    public class CustomMapperToFixed<S> implements CustomMapper<S, BookDTO> {
+        private String fixed;
+
+        public CustomMapperToFixed(String fixed) {
+            this.fixed = fixed;
+        }
+
+        @Override
+        public BookDTO map(S source) {
+            final BookDTO bookDTO = new BookDTO();
+            bookDTO.setName(fixed);
+            return bookDTO;
         }
     }
 }
