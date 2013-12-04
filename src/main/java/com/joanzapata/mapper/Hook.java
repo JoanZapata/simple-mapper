@@ -18,6 +18,23 @@
  */
 package com.joanzapata.mapper;
 
+/**
+ * Define a hook when you need to add or modify
+ * information on a bean *after* it's been mapped.
+ * If you want to create the destination yourself,
+ * use a CustomMapper.
+ * @param <S> Source type.
+ * @param <D> Destination type.
+ */
 public interface Hook<S, D> {
+
+    /**
+     * Do NOT try to do "to = something", it won't work. The
+     * target object is already created, you can only fill in some
+     * more information if you need to. If you want to create
+     * the destination yourself, use a CustomMapper.
+     * @param from The source object.
+     * @param to   The destination object.
+     */
     void extraMapping(S from, D to);
 }
