@@ -46,11 +46,57 @@ import static org.junit.Assert.*;
 
 public class MapperTest {
 
+    @Test(expected = StackOverflowError.class)
+    public void cyclicDependenciesErrorWithCustomMapper() {
+        final Book testBook = createTestBook();
+
+        final Mapper bookMapper = new Mapper();
+        final Mapper phoneEntryMapper = new Mapper()
+                .customMapper(new CustomMapper<Book, BookDTO>() {
+                    @Override
+                    public BookDTO map(Book source, MappingContext context) {
+                        return bookMapper.map(source, BookDTO.class);
+                    }
+                });
+
+        bookMapper.customMapper(new CustomMapper<PhoneEntry, PhoneEntryDTO>() {
+            @Override
+            public PhoneEntryDTO map(PhoneEntry source, MappingContext context) {
+                return phoneEntryMapper.map(source, PhoneEntryDTO.class);
+            }
+        });
+
+        bookMapper.map(testBook, BookDTO.class);
+    }
+
+    @Test
+    public void cyclicDependenciesSuccessWithCustomMapper() {
+        final Book testBook = createTestBook();
+
+        final Mapper bookMapper = new Mapper();
+        final Mapper phoneEntryMapper = new Mapper()
+                .customMapper(new CustomMapper<Book, BookDTO>() {
+                    @Override
+                    public BookDTO map(Book source, MappingContext context) {
+                        return bookMapper.map(source, BookDTO.class, context);
+                    }
+                });
+
+        bookMapper.customMapper(new CustomMapper<PhoneEntry, PhoneEntryDTO>() {
+            @Override
+            public PhoneEntryDTO map(PhoneEntry source, MappingContext context) {
+                return phoneEntryMapper.map(source, PhoneEntryDTO.class, context);
+            }
+        });
+
+        bookMapper.map(testBook, BookDTO.class);
+    }
+
     @Test
     public void singleObjectWithCustomMapperToNull() {
         Mapper mapper = new Mapper().customMapper(new CustomMapper<Book, BookDTO>() {
             @Override
-            public BookDTO map(Book source) {
+            public BookDTO map(Book source, MappingContext mappingContext) {
                 return null;
             }
         });
@@ -62,7 +108,7 @@ public class MapperTest {
     public void objectListWithCustomMapperToNull() {
         Mapper mapper = new Mapper().customMapper(new CustomMapper<Book, BookDTO>() {
             @Override
-            public BookDTO map(Book source) {
+            public BookDTO map(Book source, MappingContext mappingContext) {
                 return null;
             }
         });
@@ -78,7 +124,7 @@ public class MapperTest {
     public void singleObjectWithCustomMapperToFixed() {
         Mapper mapper = new Mapper().customMapper(new CustomMapper<Book, BookDTO>() {
             @Override
-            public BookDTO map(Book source) {
+            public BookDTO map(Book source, MappingContext mappingContext) {
                 final BookDTO bookDTO = new BookDTO();
                 bookDTO.setName("Fixed");
                 return bookDTO;
@@ -93,7 +139,7 @@ public class MapperTest {
     public void objectListWithCustomMapperToFixed() {
         Mapper mapper = new Mapper().customMapper(new CustomMapper<Book, BookDTO>() {
             @Override
-            public BookDTO map(Book source) {
+            public BookDTO map(Book source, MappingContext mappingContext) {
                 final BookDTO bookDTO = new BookDTO();
                 bookDTO.setName("Fixed");
                 return bookDTO;
@@ -117,7 +163,7 @@ public class MapperTest {
                 .mapping(PhoneEntry.class, PhoneEntryDTO.class)
                 .customMapper(new CustomMapper<PhoneEntry, PhoneEntryDTO>() {
                     @Override
-                    public PhoneEntryDTO map(PhoneEntry source) {
+                    public PhoneEntryDTO map(PhoneEntry source, MappingContext mappingContext) {
                         return null;
                     }
                 });
@@ -134,7 +180,7 @@ public class MapperTest {
                 .mapping(PhoneEntry.class, PhoneEntryDTO.class)
                 .customMapper(new CustomMapper<PhoneEntry, PhoneEntryDTO>() {
                     @Override
-                    public PhoneEntryDTO map(PhoneEntry source) {
+                    public PhoneEntryDTO map(PhoneEntry source, MappingContext mappingContext) {
                         final PhoneEntryDTO phoneEntryDTO = new PhoneEntryDTO();
                         phoneEntryDTO.setPhoneNumber("Fixed");
                         return phoneEntryDTO;
@@ -155,7 +201,7 @@ public class MapperTest {
                 .mapping(PhoneEntry.class, PhoneEntryDTO.class)
                 .customMapper(new CustomMapper<PhoneEntry, Object>() {
                     @Override
-                    public Object map(PhoneEntry source) {
+                    public Object map(PhoneEntry source, MappingContext mappingContext) {
                         fail("Shouldn't call this mapper");
                         return null;
                     }

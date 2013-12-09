@@ -21,7 +21,9 @@ package com.joanzapata.mapper;
 /**
  * Define a CustomMapper when you want
  * to map parts of your model by yourself,
- * or using another mapper.
+ * or using another mapper. If you call map()
+ * on another mapper in this method don't forget
+ * to give it the context as an argument.
  * @param <S> Source type
  * @param <D> Destination type
  */
@@ -29,9 +31,10 @@ public interface CustomMapper<S, D> {
 
     /**
      * Map the given source into the destination.
-     * @param source The source object.
+     * @param source  The source object.
+     * @param context The current mapping context.
      * @return The destination object you've created using the source object.
      */
-    D map(S source);
+    D map(S source, MappingContext context);
 
 }

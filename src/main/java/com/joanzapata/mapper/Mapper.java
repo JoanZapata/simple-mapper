@@ -128,21 +128,43 @@ public final class Mapper {
      * @return A destination instance filled using its setters and the source getters.
      */
     public <D> D map(Object source, Class<D> destinationClass) {
+        return map(source, destinationClass, null);
+    }
+
+    /**
+     * Map the source object with the destination class using the getters/setters.
+     * This method is thread-safe.
+     * @param source           The source object.
+     * @param destinationClass The destination class.
+     * @param mappingContext   An existing mapping context.
+     * @return A destination instance filled using its setters and the source getters.
+     */
+    public <D> D map(Object source, Class<D> destinationClass, MappingContext mappingContext) {
         if (source instanceof Iterable)
             return (D) map((Iterable) source, destinationClass);
-        MappingContext context = new MappingContext(mappings);
+        MappingContext context = new MappingContext(mappingContext, mappings);
         return nominalMap(source, destinationClass, context);
     }
 
     /** Same as {@link #map(Object, Class)}, but applies to collections. */
     public <D, U, CU extends Collection<U>, CD extends Collection<D>>
     CD map(CU source, Class<D> destinationClass) {
-        return mapCollection(source, destinationClass, new MappingContext(mappings));
+        return map(source, destinationClass, null);
+    }
+
+    /** Same as {@link #map(Object, Class)}, but applies to collections. */
+    public <D, U, CU extends Collection<U>, CD extends Collection<D>> CD map(CU source, Class<D> destinationClass, MappingContext mappingContext) {
+        return mapCollection(source, destinationClass, new MappingContext(mappingContext, mappings));
     }
 
     /** Same as {@link #map(Object, Class)}, but applies to map objects. */
     public <KS, VS, KD, VD> Map<KD, VD> map(Map<KS, VS> source, Class<KD> destinationKeyClass, Class<VD> destinationValueClass) {
-        return mapMap(source, destinationKeyClass, destinationValueClass, new MappingContext(mappings));
+        return map(source, destinationKeyClass, destinationValueClass, null);
+    }
+
+    /** Same as {@link #map(Object, Class)}, but applies to map objects. */
+    public <KS, VS, KD, VD> Map<KD, VD> map(Map<KS, VS> source, Class<KD> destinationKeyClass, Class<VD> destinationValueClass, MappingContext mappingContext) {
+        return mapMap(source, destinationKeyClass, destinationValueClass, new MappingContext(mappingContext, mappings));
     }
 
     private <D, U, CD extends Collection<D>, CU extends Collection<U>>
@@ -231,7 +253,7 @@ public final class Mapper {
         }
 
         // Try to find appropriate customMapper if any
-        CustomMapperResult<D> customMapperResult = MapperUtil.applyCustomMappers(customMappers, source, destinationClass);
+        CustomMapperResult<D> customMapperResult = MapperUtil.applyCustomMappers(customMappers, source, destinationClass, context);
         if (customMapperResult.hasMatched) return customMapperResult.result;
 
         // Map native types if possible

@@ -146,11 +146,11 @@ final class MapperUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static <D> CustomMapperResult<D> applyCustomMappers(List<CustomMapperWrapper> customMappers, Object source, Class<D> destinationClass) {
+    public static <D> CustomMapperResult<D> applyCustomMappers(List<CustomMapperWrapper> customMappers, Object source, Class<D> destinationClass, MappingContext mappingContext) {
         for (CustomMapperWrapper customMapper : customMappers) {
             if (customMapper.isApplicable(source, destinationClass)) {
                 // Mapped has applied
-                final D destination = (D) customMapper.apply(source, destinationClass);
+                final D destination = (D) customMapper.apply(source, destinationClass, mappingContext);
                 return new CustomMapperResult(destination);
             }
         }

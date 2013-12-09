@@ -48,13 +48,13 @@ class CustomMapperWrapper<S, D> {
         return false;
     }
 
-    public D apply(S source, Class<D> destination) {
+    public D apply(S source, Class<D> destination, MappingContext mappingContext) {
         if (isApplicable(source, destination)) {
-            return applySafe((S) source);
+            return applySafe((S) source, mappingContext);
         } else return null;
     }
 
-    private D applySafe(S source) {
-        return customMapper.map(source);
+    private D applySafe(S source, MappingContext mappingContext) {
+        return customMapper.map(source, mappingContext);
     }
 }

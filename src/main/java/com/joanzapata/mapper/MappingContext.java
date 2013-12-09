@@ -21,23 +21,32 @@ package com.joanzapata.mapper;
 import java.util.HashMap;
 import java.util.Map;
 
-class MappingContext {
+public class MappingContext {
 
     /** Contains all the already mapped objects */
     private final Map<Object, Object> sourceToDestination;
 
     private final Map<Class, Class> mappings;
 
-    public MappingContext(Map<Class, Class> mappings) {
+    MappingContext(Map<Class, Class> mappings) {
+        this(null, mappings);
+    }
+
+    /** @param mappingContext Optional mapping context to merge with.F */
+    MappingContext(MappingContext mappingContext, Map<Class, Class> mappings) {
         this.mappings = mappings;
         sourceToDestination = new HashMap<Object, Object>();
+        if (mappingContext != null) {
+            this.mappings.putAll(mappingContext.mappings);
+            this.sourceToDestination.putAll(mappingContext.sourceToDestination);
+        }
     }
 
     public void addMapping(Class source, Class destination) {
         mappings.put(source, destination);
     }
 
-    public Class getMapping(Class source) {
+    Class getMapping(Class source) {
         return mappings.get(source);
     }
 
