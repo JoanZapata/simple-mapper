@@ -11,7 +11,7 @@ Simple Mapper is **available in [Maven Central](http://search.maven.org/remoteco
 <dependency>
     <groupId>com.joanzapata.mapper</groupId>
     <artifactId>simple-mapper</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
 </dependency>
 ```
 
