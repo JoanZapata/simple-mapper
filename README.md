@@ -67,6 +67,29 @@ Mapper mapper = new Mapper()
 * Hooks are called **after** the object has been fully mapped.
 * Hooks are guaranteed to be called in the **order** you added them to the mapper. 
 
+# Custom Mapping
+
+If you need to totally handle the mapping of certain types, you can provide custom mappers:
+
+```java
+Mapper mapper = new Mapper()
+    .customMapper(new CustomMapper<PhoneEntry, PhoneEntryDTO>() {
+        @Override
+        public PhoneEntryDTO map(PhoneEntry source, MappingContext context) {
+            // Here you can create a PhoneEntryDTO by yourself and return it.
+            PhoneEntryDTO phoneEntryDTO = new PhoneEntryDTO();
+            phoneEntryDTO.setNumber(source.getNumber());
+            phoneEntryDTO.setName(source.getName());
+            return phoneEntryDTO;
+            
+            // You can also delegate it to another mapper, in this case don't
+            // forget to pass the mapping context along with the source:
+            return phoneEntryMapper.map(source, PhoneEntryDTO.class, context);
+        }
+    };
+});
+```
+
 # Strict Mode
 
 The simple-mapper is very permissive by default. If something wrong happens mapping a property, it gives up and goes to the next property to map. You can override this behavior by setting the ```StrictMode```. In this mode, the ```map()``` function will raise a ```StrictModeException``` if something goes wrong:
