@@ -1,4 +1,4 @@
-# 1.0.5 / 1.0.6
+# 1.0.7
 
 * Added the current mapping context as a parameter for custom mappers so that the user can avoid circular references by passing it to the next mapper
 
