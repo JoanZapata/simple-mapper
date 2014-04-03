@@ -90,6 +90,24 @@ Mapper mapper = new Mapper()
 });
 ```
 
+If you need to provide a custom mapping both ways, you can use a CustomBiMapper:
+
+```java
+Mapper mapper = new Mapper()
+    .customBiMapper(new CustomBiMapper<PhoneEntry, PhoneEntryDTO>() {
+        @Override
+        public PhoneEntryDTO mapForward(PhoneEntry source, MappingContext context) {
+            // Mapping
+        }
+    
+        @Override
+        public PhoneEntry mapBackward(PhoneEntryDTO source, MappingContext context) {
+            // Mapping
+        }
+    };
+});
+```
+
 # Strict Mode
 
 The simple-mapper is very permissive by default. If something wrong happens mapping a property, it gives up and goes to the next property to map. You can override this behavior by setting the ```StrictMode```. In this mode, the ```map()``` function will raise a ```StrictModeException``` if something goes wrong:
