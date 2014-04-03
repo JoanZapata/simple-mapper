@@ -49,7 +49,7 @@ public final class Mapper {
     private final List<HookWrapper> hooks;
 
     private final List<CustomMapperWrapper> customMappers;
-
+    
     private boolean strictMode = false;
 
     public Mapper() {
@@ -119,6 +119,32 @@ public final class Mapper {
         customMappers.add(new CustomMapperWrapper(customMapper));
         return this;
     }
+    
+    /**
+     * Add a custom bi mapper to the mapping process. This custom bi mapper will be called when
+     * the mapper will need to transform an object of type S to an object of type D or vice versa.
+     * @param customMapper Implement this interface to provide a mapping method from S to D and vice versa.
+     * @param <S>          The source type.
+     * @param <D>          The destination type.
+     * @return The current mapper for chaining.
+     */
+    public <S, D> Mapper customBiMapper(final CustomBiMapper<S, D> customBiMapper) {
+        
+        return 
+            customMapper(new CustomMapper<S, D>() {
+                @Override
+                public D map(S source, MappingContext context) {
+                    return customBiMapper.mapForward(source, context);
+                }
+            })
+            .customMapper(new CustomMapper<D, S>() {
+                @Override
+                public S map(D source, MappingContext context) {
+                    return customBiMapper.mapBackward(source, context);
+                }
+            });
+    }
+    
 
     /**
      * Map the source object with the destination class using the getters/setters.
