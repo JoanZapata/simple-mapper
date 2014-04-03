@@ -10,7 +10,7 @@
 
     <groupId>com.joanzapata.mapper</groupId>
     <artifactId>simple-mapper</artifactId>
-    <version>1.0.8-SNAPSHOT</version>
+    <version>1.0.8</version>
     <name>Simple Mapper</name>
     <packaging>jar</packaging>
     <description>A very simple POJO mapper based on getters/setters with support for inheritance, cyclic dependencies,
