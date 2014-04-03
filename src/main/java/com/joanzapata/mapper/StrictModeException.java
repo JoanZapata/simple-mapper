@@ -20,7 +20,9 @@ package com.joanzapata.mapper;
 
 public class StrictModeException extends RuntimeException {
 
-    public StrictModeException(String s) {
+	private static final long serialVersionUID = 9131747237665174075L;
+
+	public StrictModeException(String s) {
         super(s);
     }
 

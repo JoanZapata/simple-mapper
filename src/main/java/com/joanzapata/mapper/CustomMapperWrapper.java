@@ -28,7 +28,7 @@ class CustomMapperWrapper<S, D> {
         this.customMapper = customMapper;
     }
 
-    public boolean isApplicable(Object source, Class destination) {
+    public boolean isApplicable(Object source, Class<?> destination) {
         final Method[] methods = customMapper.getClass().getMethods();
 
         for (Method method : methods) {
@@ -48,7 +48,8 @@ class CustomMapperWrapper<S, D> {
         return false;
     }
 
-    public D apply(S source, Class<D> destination, MappingContext mappingContext) {
+    @SuppressWarnings("unchecked")
+	public D apply(Object source, Class<?> destination, MappingContext mappingContext) {
         if (isApplicable(source, destination)) {
             return applySafe((S) source, mappingContext);
         } else return null;

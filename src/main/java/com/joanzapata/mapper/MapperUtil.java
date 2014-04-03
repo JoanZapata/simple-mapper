@@ -46,7 +46,7 @@ final class MapperUtil {
         String expectedGetterName = "get" + setter.getName().substring(3);
         String expectedGetterNameForBooleans = "is" + setter.getName().substring(3);
 
-        Class loopClass = source.getClass();
+        Class<?> loopClass = source.getClass();
         while (loopClass != Object.class) {
             for (Method method : loopClass.getMethods()) {
                 if (method.getParameterTypes().length != 0) continue;
@@ -77,7 +77,8 @@ final class MapperUtil {
         return expectedGetterName;
     }
 
-    public static <D> D mapPrimitiveTypeOrNull(Object source) {
+    @SuppressWarnings("unchecked")
+	public static <D> D mapPrimitiveTypeOrNull(Object source) {
         if (source instanceof Byte ||
                 source instanceof Short ||
                 source instanceof Integer ||
@@ -93,7 +94,7 @@ final class MapperUtil {
     }
 
     public static <D> boolean isCompatiblePrimitiveType(D destinationObject, Class<D> expectedClass) {
-        Class expectedClassAutoboxed = autoBox(expectedClass);
+        Class<?> expectedClassAutoboxed = autoBox(expectedClass);
         return expectedClassAutoboxed.isAssignableFrom(destinationObject.getClass());
     }
 
@@ -113,12 +114,13 @@ final class MapperUtil {
      * Try to find a user defined mapping for the source class that is more precise than
      * the destination type retrieved from target object.
      */
-    public static <D> Class<D> findBestDestinationType(
+    @SuppressWarnings("unchecked")
+	public static <D> Class<D> findBestDestinationType(
             Class<?> sourceClass, Class<D> destinationClass, MappingContext context) {
-        Class explicitMapping = context.getMapping(sourceClass);
-        return (explicitMapping == null ||
+        Class<?> explicitMapping = context.getMapping(sourceClass);
+        return (Class<D>) ((explicitMapping == null ||
                 explicitMapping.isAssignableFrom(destinationClass)) ?
-                destinationClass : explicitMapping;
+                destinationClass : explicitMapping);
     }
 
     /**
@@ -129,7 +131,7 @@ final class MapperUtil {
      */
     public static List<Method> findAllSetterMethods(Class<?> ofClass) {
         List<Method> methods = new ArrayList<Method>();
-        Class currentClass = ofClass;
+        Class<?> currentClass = ofClass;
         while (currentClass != Object.class) {
             for (Method method : currentClass.getMethods())
                 if (method.getName().startsWith("set"))
@@ -139,23 +141,23 @@ final class MapperUtil {
         return methods;
     }
 
-    public static void applyHooks(List<HookWrapper> hooks, Object source, Object destination) {
-        for (HookWrapper hook : hooks) {
+    public static void applyHooks(List<HookWrapper<?, ?>> hooks, Object source, Object destination) {
+        for (HookWrapper<?, ?> hook : hooks) {
             hook.apply(source, destination);
         }
     }
 
     @SuppressWarnings("unchecked")
-    public static <D> CustomMapperResult<D> applyCustomMappers(List<CustomMapperWrapper> customMappers, Object source, Class<D> destinationClass, MappingContext mappingContext) {
-        for (CustomMapperWrapper customMapper : customMappers) {
+    public static <D> CustomMapperResult<D> applyCustomMappers(List<CustomMapperWrapper<?, ?>> customMappers, Object source, Class<D> destinationClass, MappingContext mappingContext) {
+        for (CustomMapperWrapper<?, ?> customMapper : customMappers) {
             if (customMapper.isApplicable(source, destinationClass)) {
                 // Mapped has applied
                 final D destination = (D) customMapper.apply(source, destinationClass, mappingContext);
-                return new CustomMapperResult(destination);
+                return new CustomMapperResult<D>(destination);
             }
         }
         // Mapped has not applied
-        return new CustomMapperResult();
+        return new CustomMapperResult<D>();
 
     }
 }
