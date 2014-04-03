@@ -466,6 +466,34 @@ public class MapperTest {
         assertTrue(output.contains("Test"));
         assertEquals(1, output.size());
     }
+    
+    @Test
+    public void testCustomBiMappers() {
+        Book book = createTestBook();
+
+        Mapper mapper = new Mapper()
+            .customBiMapper(new CustomBiMapper<Book, BookDTO>() {
+                @Override
+                public Book mapBackward(BookDTO d, MappingContext c) {
+                    return new Book(d.getId(), d.getName());
+                }
+    
+                @Override
+                public BookDTO mapForward(Book s, MappingContext c) {
+                    BookDTO b = new BookDTO();
+                    b.setId(s.getId());
+                    b.setName(s.getName());
+                    return b;
+                    
+                }
+            });
+
+        BookDTO bookDTO = mapper.map(book, BookDTO.class);
+        Book newBook = mapper.map(bookDTO, Book.class);
+
+        assertEquals(book.getId(), newBook.getId());
+        assertEquals(book.getName(), newBook.getName());
+    }
 
     private Book createTestBook() {
         return createTestBook(0L);
@@ -550,5 +578,4 @@ public class MapperTest {
             this.testOtherDTO = testOtherDTO;
         }
     }
-
 }
