@@ -20,8 +20,11 @@ package com.joanzapata.mapper;
 
 import java.lang.reflect.Method;
 
-class CustomMapperWrapper<S, D> {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+class CustomMapperWrapper<S, D> {
+    
     private final CustomMapper<S, D> customMapper;
 
     CustomMapperWrapper(CustomMapper<S, D> customMapper) {
@@ -35,6 +38,7 @@ class CustomMapperWrapper<S, D> {
             if ("map".equals(method.getName())) {
                 Class<?> parameterType = method.getParameterTypes()[0];
                 Class<?> returnType = method.getReturnType();
+                
                 // Ignore Object because it's too large
                 if (parameterType != Object.class && returnType != Object.class &&
                         // Parameter type of the user function will be assigned the source object
