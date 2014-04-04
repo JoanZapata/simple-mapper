@@ -470,20 +470,53 @@ public class MapperTest {
     @Test
     public void testCustomBiMappers() {
         Book book = createTestBook();
+        
+        final Mapper bookMapper = new Mapper().biMapping(Book.class, BookDTO.class);
 
         Mapper mapper = new Mapper()
-            .customBiMapper(new CustomBiMapper<Book, BookDTO>() {
+            .customBiMapper(new CustomBiMapper<BookEntry, BookEntryDTO>() {
                 @Override
-                public Book mapBackward(BookDTO d, MappingContext c) {
-                    return new Book(d.getId(), d.getName());
+                public BookEntry mapBackward(BookEntryDTO d, MappingContext c) {
+                    BookEntry bookEntry = null;
+                    if(d instanceof PhoneEntryDTO) {
+                        PhoneEntryDTO phoneEntry = (PhoneEntryDTO) d;
+                        bookEntry = new PhoneEntry();
+                        ((PhoneEntry) bookEntry).setPhoneNumber(phoneEntry.getPhoneNumber());
+                    } else if (d instanceof AddressEntryDTO) {
+                        AddressEntryDTO addressEntry = (AddressEntryDTO) d;
+                        bookEntry = new AddressEntry();
+                        ((AddressEntry) bookEntry).setCity(addressEntry.getCity());
+                        ((AddressEntry) bookEntry).setCountry(addressEntry.getCountry());
+                    } else {
+                        bookEntry = new BookEntry();
+                    }
+                    
+                    bookEntry.setId(d.getId());
+                    bookEntry.setBook(bookMapper.map(d.getBookDTO(), Book.class));
+                    
+                    return bookEntry;
                 }
     
                 @Override
-                public BookDTO mapForward(Book s, MappingContext c) {
-                    BookDTO b = new BookDTO();
-                    b.setId(s.getId());
-                    b.setName(s.getName());
-                    return b;
+                public BookEntryDTO mapForward(BookEntry s, MappingContext c) {
+                    BookEntryDTO bookEntry = null;
+                    if(s instanceof PhoneEntry) {
+                        PhoneEntry phoneEntry = (PhoneEntry) s;
+                        bookEntry = new PhoneEntryDTO();
+                        ((PhoneEntryDTO) bookEntry).setPhoneNumber(phoneEntry.getPhoneNumber());
+                    } else if (s instanceof AddressEntry) {
+                        AddressEntry addressEntry = (AddressEntry) s;
+                        bookEntry = new AddressEntryDTO();
+                        ((AddressEntryDTO) bookEntry).setCity(addressEntry.getCity());
+                        ((AddressEntryDTO) bookEntry).setCountry(addressEntry.getCountry());
+                    } else {
+                        bookEntry = new BookEntryDTO();
+                    }
+                    
+                    bookEntry.setId(s.getId());
+                    bookEntry.setBookDTO(bookMapper.map(s.getBook(), BookDTO.class));
+                    
+                    return bookEntry;
                     
                 }
             });

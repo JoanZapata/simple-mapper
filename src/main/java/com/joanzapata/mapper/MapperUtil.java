@@ -22,10 +22,15 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static com.joanzapata.mapper.Mapper.CustomMapperResult;
 
 final class MapperUtil {
 
+    private static final Logger logger = LoggerFactory.getLogger(MapperUtil.class);
+    
     /**
      * Find a getter on the source object for the given setter name.
      * @param source The source object.
@@ -150,9 +155,29 @@ final class MapperUtil {
     @SuppressWarnings("unchecked")
     public static <D> CustomMapperResult<D> applyCustomMappers(List<CustomMapperWrapper<?, ?>> customMappers, Object source, Class<D> destinationClass, MappingContext mappingContext) {
         for (CustomMapperWrapper<?, ?> customMapper : customMappers) {
+            logger.debug("source: {}, destination: {}", source.getClass().getSimpleName(), destinationClass.getSimpleName());
             if (customMapper.isApplicable(source, destinationClass)) {
                 // Mapped has applied
                 final D destination = (D) customMapper.apply(source, destinationClass, mappingContext);
+                return new CustomMapperResult<D>(destination);
+            }
+        }
+        // Mapped has not applied
+        return new CustomMapperResult<D>();
+
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <D> CustomMapperResult<D> applyCustomBiMappers(List<CustomBiMapperWrapper<?, ?>> customBiMappers, Object source, Class<D> destinationClass, MappingContext mappingContext) {
+        logger.debug("source: {}, destination: {}", source.getClass().getSimpleName(), destinationClass.getSimpleName());
+        for (CustomBiMapperWrapper<?, ?> customBiMapper : customBiMappers) {
+            if (customBiMapper.isApplicableForward(source, destinationClass)) {
+                // Mapped has applied
+                final D destination = (D) customBiMapper.applyForward(source, destinationClass, mappingContext);
+                return new CustomMapperResult<D>(destination);
+            } else if (customBiMapper.isApplicableBackward(source, destinationClass)) {
+                // Mapped has applied
+                final D destination = (D) customBiMapper.applyBackward(source, destinationClass, mappingContext);
                 return new CustomMapperResult<D>(destination);
             }
         }

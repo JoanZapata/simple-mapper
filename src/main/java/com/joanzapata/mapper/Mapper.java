@@ -50,12 +50,15 @@ public final class Mapper {
 
     private final List<CustomMapperWrapper<?,?>> customMappers;
     
+    private final List<CustomBiMapperWrapper<?, ?>> customBiMappers;
+    
     private boolean strictMode = false;
 
     public Mapper() {
         mappings = new HashMap<Class<?>, Class<?>>();
         hooks = new ArrayList<HookWrapper<?, ?>>();
         customMappers = new ArrayList<CustomMapperWrapper<?, ?>>();
+        customBiMappers = new ArrayList<CustomBiMapperWrapper<?, ?>>();
     }
 
     /**
@@ -129,20 +132,8 @@ public final class Mapper {
      * @return The current mapper for chaining.
      */
     public <S, D> Mapper customBiMapper(final CustomBiMapper<S, D> customBiMapper) {
-        
-        return 
-            customMapper(new CustomMapper<S, D>() {
-                @Override
-                public D map(S source, MappingContext context) {
-                    return customBiMapper.mapForward(source, context);
-                }
-            })
-            .customMapper(new CustomMapper<D, S>() {
-                @Override
-                public S map(D source, MappingContext context) {
-                    return customBiMapper.mapBackward(source, context);
-                }
-            });
+        customBiMappers.add(new CustomBiMapperWrapper<S, D>(customBiMapper));
+        return this;
     }
     
 
@@ -283,6 +274,9 @@ public final class Mapper {
         // Try to find appropriate customMapper if any
         CustomMapperResult<D> customMapperResult = MapperUtil.applyCustomMappers(customMappers, source, destinationClass, context);
         if (customMapperResult.hasMatched) return customMapperResult.result;
+        
+        CustomMapperResult<D> customBiMapperResult = MapperUtil.applyCustomBiMappers(customBiMappers, source, destinationClass, context);
+        if (customBiMapperResult.hasMatched) return customBiMapperResult.result;
 
         // Map native types if possible
         D nativeMapped = mapPrimitiveTypeOrNull(source);
