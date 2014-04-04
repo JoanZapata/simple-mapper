@@ -20,9 +20,6 @@ package com.joanzapata.mapper;
 
 import java.lang.reflect.Method;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 class CustomMapperWrapper<S, D> {
     
     private final CustomMapper<S, D> customMapper;
