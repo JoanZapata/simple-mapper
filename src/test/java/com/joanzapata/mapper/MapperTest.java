@@ -388,7 +388,7 @@ public class MapperTest {
     public void testDirectIncompatibleTypes() {
         Map<Long, String> input = new HashMap<Long, String>();
         input.put(1L, "1");
-        Map<Long, BookDTO> incompatibleOutput = new Mapper().strictMode(true).map(input, Long.class, BookDTO.class);
+        new Mapper().strictMode(true).map(input, Long.class, BookDTO.class);
     }
 
     @Test
@@ -412,7 +412,7 @@ public class MapperTest {
         Mapper mapper = new Mapper().strictMode();
         ModelWithString input = new ModelWithString();
         input.setData("Test");
-        ModelWithCollection output = mapper.map(input, ModelWithCollection.class);
+        mapper.map(input, ModelWithCollection.class);
     }
 
     @Test
@@ -431,7 +431,7 @@ public class MapperTest {
         final ArrayList<String> data = new ArrayList<String>();
         data.add("Test");
         input.setData(data);
-        ModelWithString output = mapper.map(input, ModelWithString.class);
+        mapper.map(input, ModelWithString.class);
     }
 
     @Test

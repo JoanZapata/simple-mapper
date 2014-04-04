@@ -26,14 +26,14 @@ public class MappingContext {
     /** Contains all the already mapped objects */
     private final Map<Object, Object> sourceToDestination;
 
-    private final Map<Class, Class> mappings;
+    private final Map<Class<?>, Class<?>> mappings;
 
-    MappingContext(Map<Class, Class> mappings) {
+    MappingContext(Map<Class<?>, Class<?>> mappings) {
         this(null, mappings);
     }
 
     /** @param mappingContext Optional mapping context to merge with.F */
-    MappingContext(MappingContext mappingContext, Map<Class, Class> mappings) {
+    MappingContext(MappingContext mappingContext, Map<Class<?>, Class<?>> mappings) {
         this.mappings = mappings;
         sourceToDestination = new HashMap<Object, Object>();
         if (mappingContext != null) {
@@ -42,11 +42,11 @@ public class MappingContext {
         }
     }
 
-    public void addMapping(Class source, Class destination) {
+    public void addMapping(Class<?> source, Class<?> destination) {
         mappings.put(source, destination);
     }
 
-    Class getMapping(Class source) {
+    Class<?> getMapping(Class<?> source) {
         return mappings.get(source);
     }
 
@@ -55,7 +55,8 @@ public class MappingContext {
      * @param source The source object.
      * @return the destination object, or null if not mapped already.
      */
-    public <D> D getAlreadyMapped(Object source) {
+    @SuppressWarnings("unchecked")
+	public <D> D getAlreadyMapped(Object source) {
         return (D) sourceToDestination.get(source);
     }
 

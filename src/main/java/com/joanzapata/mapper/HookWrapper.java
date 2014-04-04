@@ -28,7 +28,8 @@ class HookWrapper<S, D> {
         this.hook = hook;
     }
 
-    public void apply(Object source, Object destination) {
+    @SuppressWarnings("unchecked")
+	public void apply(Object source, Object destination) {
         for (Method method : hook.getClass().getMethods()) {
             if ("extraMapping".equals(method.getName())) {
                 Class<?>[] parameterTypes = method.getParameterTypes();

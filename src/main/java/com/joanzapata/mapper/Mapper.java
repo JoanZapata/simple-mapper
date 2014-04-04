@@ -42,20 +42,20 @@ public final class Mapper {
 
     private final Logger logger = LoggerFactory.getLogger(Mapper.class);
 
-    private final Map<Class, Class> mappings;
+    private final Map<Class<?>, Class<?>> mappings;
 
     private final List<String> knownSuffixes = asList("DTO", "BO");
 
-    private final List<HookWrapper> hooks;
+    private final List<HookWrapper<?, ?>> hooks;
 
-    private final List<CustomMapperWrapper> customMappers;
+    private final List<CustomMapperWrapper<?,?>> customMappers;
     
     private boolean strictMode = false;
 
     public Mapper() {
-        mappings = new HashMap<Class, Class>();
-        hooks = new ArrayList<HookWrapper>();
-        customMappers = new ArrayList<CustomMapperWrapper>();
+        mappings = new HashMap<Class<?>, Class<?>>();
+        hooks = new ArrayList<HookWrapper<?, ?>>();
+        customMappers = new ArrayList<CustomMapperWrapper<?, ?>>();
     }
 
     /**
@@ -103,7 +103,7 @@ public final class Mapper {
      * @return The current mapper for chaining.
      */
     public <S, D> Mapper hook(Hook<S, D> hook) {
-        hooks.add(new HookWrapper(hook));
+        hooks.add(new HookWrapper<S, D>(hook));
         return this;
     }
 
@@ -116,7 +116,7 @@ public final class Mapper {
      * @return The current mapper for chaining.
      */
     public <S, D> Mapper customMapper(CustomMapper<S, D> customMapper) {
-        customMappers.add(new CustomMapperWrapper(customMapper));
+        customMappers.add(new CustomMapperWrapper<S, D>(customMapper));
         return this;
     }
     
@@ -167,7 +167,7 @@ public final class Mapper {
      */
     public <D> D map(Object source, Class<D> destinationClass, MappingContext mappingContext) {
         if (source instanceof Iterable)
-            return (D) map((Iterable) source, destinationClass);
+            return (D) map((Iterable<?>) source, destinationClass);
         MappingContext context = new MappingContext(mappingContext, mappings);
         return nominalMap(source, destinationClass, context);
     }
@@ -193,7 +193,8 @@ public final class Mapper {
         return mapMap(source, destinationKeyClass, destinationValueClass, new MappingContext(mappingContext, mappings));
     }
 
-    private <D, U, CD extends Collection<D>, CU extends Collection<U>>
+    @SuppressWarnings("unchecked")
+	private <D, U, CD extends Collection<D>, CU extends Collection<U>>
     CD mapCollection(CU source, Class<D> destinationClass, MappingContext context) {
         if (source == null) return null;
         // Instantiate the same type as the source
@@ -227,7 +228,7 @@ public final class Mapper {
         return out;
     }
 
-    private <D> D mapEnum(Enum source, Class<D> destinationClass, MappingContext context) {
+    private <D> D mapEnum(Enum<?> source, Class<D> destinationClass, MappingContext context) {
         if (!destinationClass.isEnum()) {
             if (strictMode)
                 throw new StrictModeException("Unable to map "
@@ -237,7 +238,7 @@ public final class Mapper {
         }
 
         for (D constant : destinationClass.getEnumConstants()) {
-            if (((Enum) constant).name().equals(source.name())) {
+            if (((Enum<?>) constant).name().equals(source.name())) {
                 return constant;
             }
         }
@@ -254,22 +255,23 @@ public final class Mapper {
         return nominalMap(source, null, destinationClass, context);
     }
 
-    private <D> D nominalMap(Object source, Type field, Class<D> destinationClass, MappingContext context) {
+    @SuppressWarnings("unchecked")
+	private <D> D nominalMap(Object source, Type field, Class<D> destinationClass, MappingContext context) {
         if (source == null) return null;
 
         if (source instanceof Collection) {
             ParameterizedType type = (ParameterizedType) field;
-            return (D) mapCollection((Collection) source, (Class) type.getActualTypeArguments()[0], context);
+            return (D) mapCollection((Collection<?>) source, (Class<?>) type.getActualTypeArguments()[0], context);
         }
 
         if (source instanceof Map) {
             ParameterizedType type = (ParameterizedType) field;
-            return (D) mapMap((Map) source, (Class) type.getActualTypeArguments()[0],
-                    (Class) type.getActualTypeArguments()[1], context);
+            return (D) mapMap((Map<?, ?>) source, (Class<?>) type.getActualTypeArguments()[0],
+                    (Class<?>) type.getActualTypeArguments()[1], context);
         }
 
         if (source.getClass().isEnum()) {
-            return (D) mapEnum((Enum) source, destinationClass, context);
+            return (D) mapEnum((Enum<?>) source, destinationClass, context);
         }
 
         // First, use already existing if possible (prevents cyclic mapping)
