@@ -5,13 +5,13 @@
 
 # Get it
 
-Simple Mapper is **available in [Maven Central](http://search.maven.org/remotecontent?filepath=com/joanzapata/mapper/simple-mapper/1.0.8/simple-mapper-1.0.9.jar)**:
+Simple Mapper is **available in [Maven Central](http://search.maven.org/remotecontent?filepath=com/joanzapata/mapper/simple-mapper/1.0.10/simple-mapper-1.0.10.jar)**:
 
 ```xml
 <dependency>
     <groupId>com.joanzapata.mapper</groupId>
     <artifactId>simple-mapper</artifactId>
-    <version>1.0.9</version>
+    <version>1.0.10</version>
 </dependency>
 ```
 
