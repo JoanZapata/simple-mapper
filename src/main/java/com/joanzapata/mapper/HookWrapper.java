@@ -35,11 +35,10 @@ class HookWrapper<S, D> {
                 Class<?>[] parameterTypes = method.getParameterTypes();
                 Class<?> sourceClass = parameterTypes[0];
                 Class<?> destinationClass = parameterTypes[1];
-                if (sourceClass.isAssignableFrom(source.getClass()) &&
+                if (sourceClass != Object.class && destinationClass != Object.class && sourceClass.isAssignableFrom(source.getClass()) &&
                         destinationClass.isAssignableFrom(destination.getClass())) {
                     applySafe((S) source, (D) destination);
                 }
-                return;
             }
         }
     }
